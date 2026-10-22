@@ -382,7 +382,7 @@ export const MediaSlot: React.FC<MediaSlotProps> = ({
         {/* Main BÙI VỊ logo large and centered */}
         <div className="relative z-10 flex items-center justify-center">
           <img
-            src="/logo-main"
+            src={`${import.meta.env.BASE_URL}logo-main.png`}
             alt={alt}
             className="h-36 sm:h-44 lg:h-48 w-auto object-contain rounded-xl shadow-sm"
           />
@@ -418,7 +418,7 @@ export const MediaSlot: React.FC<MediaSlotProps> = ({
 
       {/* BÙI VỊ logo watermark at 15% opacity */}
       <img
-        src="/logo-main"
+        src={`${import.meta.env.BASE_URL}logo-main.png`}
         alt={alt}
         className="h-24 sm:h-28 w-auto object-contain opacity-15 select-none pointer-events-none"
       />

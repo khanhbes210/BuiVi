@@ -30,7 +30,7 @@ import {
 } from '../motion';
 
 export const HomePage: React.FC = () => {
-  const { allowKenBurns } = useMotionPreferences();
+  const { canKenBurns: allowKenBurns } = useMotionPreferences();
 
   useEffect(() => {
     document.title = 'BÙI VỊ – Một miền vun đắp, một vị lưu hương | Quà Biếu Nem Kinh Bắc Di Sản';

@@ -23,7 +23,7 @@ import { SitemapPage, NotFoundPage } from './pages/SitemapAndNotFoundPages';
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <StoreProvider>
         <Layout>
           <Routes>

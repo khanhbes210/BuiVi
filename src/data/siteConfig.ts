@@ -36,7 +36,7 @@ export const SITE_CONFIG = {
   showAnimationPlaceholders: SHOW_ANIMATION_PLACEHOLDERS,
   showMediaPlaceholders: SHOW_MEDIA_PLACEHOLDERS,
   enablePaymentFailDemo: ENABLE_PAYMENT_FAIL_DEMO,
-  logoPath: '/logo-main',
+  logoPath: `${import.meta.env.BASE_URL}logo-main.png`,
   brandName: 'BÙI VỊ',
   slogan: 'BÙI VỊ – Một miền vun đắp, một vị lưu hương',
   brandStoryQuote:

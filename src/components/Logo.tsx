@@ -12,10 +12,11 @@ export const Logo: React.FC<LogoProps> = ({
   className = '',
   imgClassName = 'h-14 lg:h-16 w-auto',
 }) => {
+  const base = import.meta.env.BASE_URL;
   const srcMap: Record<'main' | 'positive' | 'negative', string> = {
-    main: '/logo-main',
-    positive: '/logo-positive',
-    negative: '/logo-negative',
+    main: `${base}logo-main.png`,
+    positive: `${base}logo-positive.png`,
+    negative: `${base}logo-negative.png`,
   };
 
   return (

@@ -9,7 +9,9 @@ import {
 import { shouldShowAnimationPlaceholders } from '../data/siteConfig';
 import { useMotionPreferences } from './settings';
 
-const LazyLottie = React.lazy(() => import('lottie-react'));
+const LazyLottie = React.lazy(() =>
+  import('lottie-react').then((m) => ({ default: ((m as any).default ?? m) as React.ComponentType<any> }))
+);
 
 export interface AnimationSlotProps {
   id: AnimationSlotId;
