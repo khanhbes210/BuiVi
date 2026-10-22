@@ -1,0 +1,6 @@
+{
+  "name": "BÙI VỊ – Tinh Hoa Nem Kinh Bắc & Quà Biếu Di Sản",
+  "description": "BÙI VỊ – Một miền vun đắp, một vị lưu hương. Thương hiệu quà biếu di sản Nem Kinh Bắc kết hợp nghệ thuật tranh dân gian Đông Hồ và chất liệu giấy Điệp.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

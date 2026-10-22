@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 72" width="180" height="72" role="img" aria-label="BÙI VỊ Logo">
+  <rect x="3" y="3" width="56" height="66" rx="14" fill="#FFF5E4" stroke="#951722" stroke-width="2.5"/>
+  <rect x="7" y="7" width="48" height="58" rx="10" fill="none" stroke="#951722" stroke-width="1" stroke-dasharray="2 1"/>
+  <text x="31" y="32" text-anchor="middle" font-family="Yeseva One, Georgia, serif" font-size="17" font-weight="bold" fill="#951722" letter-spacing="1">BÙI</text>
+  <line x1="16" y1="38" x2="46" y2="38" stroke="#951722" stroke-width="1"/>
+  <circle cx="31" cy="38" r="2" fill="#951722"/>
+  <text x="31" y="57" text-anchor="middle" font-family="Yeseva One, Georgia, serif" font-size="18" font-weight="bold" fill="#951722" letter-spacing="1.5">VỊ</text>
+  <text x="72" y="34" font-family="Yeseva One, Georgia, serif" font-size="22" font-weight="bold" fill="#951722" letter-spacing="1.5">BÙI VỊ</text>
+  <text x="72" y="53" font-family="Be Vietnam Pro, sans-serif" font-size="10.5" font-weight="600" fill="#1F3D2A" letter-spacing="1.2">DI SẢN KINH BẮC</text>
+</svg>
