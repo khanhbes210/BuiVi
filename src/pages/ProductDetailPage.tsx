@@ -780,7 +780,8 @@ export const ProductDetailPage: React.FC = () => {
 
       {/* MOBILE STICKY BOTTOM CTA BAR (56px CTAs) — slides up when main CTAs scroll out of view */}
       <div
-        className={`lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#FFFBF2] border-t-2 border-[#951722]/40 p-3 shadow-2xl transition-transform duration-300 ${
+        style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}
+        className={`lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#FFFBF2] border-t-2 border-[#951722]/40 px-3 pt-3 shadow-2xl transition-transform duration-300 ${
           mobileStickyVisible ? 'translate-y-0' : 'translate-y-full'
         }`}
       >

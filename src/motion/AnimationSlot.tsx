@@ -587,7 +587,11 @@ export const AnimationSlot: React.FC<AnimationSlotProps> = ({
           setPlayCount((c) => c + 1);
         }
       }}
-      className={`relative rounded-2xl overflow-hidden bg-[#FFF5E4] double-border-heritage p-3.5 sm:p-4 text-center transition-colors ${className}`}
+      className={`relative overflow-hidden text-center transition-colors ${
+        showPlaceholders
+          ? 'rounded-2xl bg-[#FFF5E4] double-border-heritage p-3.5 sm:p-4'
+          : 'py-1'
+      } ${className}`}
     >
       <div key={playCount} className="relative z-10 flex flex-col items-center justify-center gap-2">
         {renderBuiltInArtwork()}

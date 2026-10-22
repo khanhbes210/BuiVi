@@ -907,11 +907,16 @@ export const Header: React.FC = () => {
                       <Link
                         key={p.id}
                         to={`/san-pham/${p.slug}`}
-                        className="flex items-center justify-between py-2 px-3 rounded-xl bg-[#FFFBF2] text-base font-semibold text-[#171815]"
+                        className="flex flex-col sm:flex-row sm:items-center justify-between py-2.5 px-3 rounded-xl bg-[#FFFBF2] hover:bg-[#F5E6CC] text-base text-[#171815] gap-1 transition-colors"
                       >
-                        <span className="truncate pr-2">
-                          {p.name} {isBest ? '(Bán chạy)' : ''}
-                        </span>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="font-semibold">{p.name}</span>
+                          {isBest && (
+                            <span className="text-[11px] font-bold bg-[#951722] text-[#FFF5E4] px-1.5 py-0.5 rounded-md">
+                              Bán chạy
+                            </span>
+                          )}
+                        </div>
                         <span className="font-price text-sm font-bold text-[#9B0514] shrink-0">
                           {formatPrice(p.price)} {disc ? `(-${disc}%)` : ''}
                         </span>

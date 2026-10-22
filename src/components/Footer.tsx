@@ -196,21 +196,10 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
-        {/* Bottom Copyright, Slogan & Font License */}
+        {/* Bottom Copyright & Slogan */}
         <div className="pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-[#FFF5E4]/85">
           <p className="text-sm">© {new Date().getFullYear()} BÙI VỊ – Công ty TNHH Di Sản Ẩm Thực Bùi Vị. Bảo lưu mọi quyền.</p>
-          <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
-            <a
-              href="/fonts/OFL.txt"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-[#F3D27A] hover:underline"
-            >
-              Phông chữ: Yeseva One, Montserrat (SIL Open Font License)
-            </a>
-            <span aria-hidden="true" className="text-[#FFF5E4]/35">
-              •
-            </span>
+          <div className="flex items-center gap-2 text-sm">
             <span className="font-display text-sm text-[#F3D27A]">{SITE_CONFIG.slogan}</span>
           </div>
         </div>

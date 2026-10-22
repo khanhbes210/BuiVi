@@ -37,18 +37,10 @@
   --font-body: var(--font-body);
   --font-mono: var(--font-body);
 
-  --font-weight-thin: 500;
-  --font-weight-extralight: 500;
-  --font-weight-light: 500;
-  --font-weight-normal: 500;
+  --font-weight-normal: 400;
   --font-weight-medium: 500;
-  --font-weight-semibold: 500;
-  --font-weight-bold: 500;
-  --font-weight-extrabold: 500;
-  --font-weight-black: 500;
-
-  --text-xs: 0.875rem;
-  --text-xs--line-height: 1.5;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
 }
 
 @layer base {
@@ -162,19 +154,10 @@
   }
 }
 
-/* Neutralize weight utilities so Montserrat stays 500 and Yeseva One stays 400 */
-.font-thin,
-.font-extralight,
-.font-light,
-.font-normal,
-.font-medium,
-.font-semibold,
-.font-bold,
-.font-extrabold,
-.font-black,
+/* Allow bold and semibold weights for clear visual hierarchy */
 strong,
 b {
-  font-weight: 500 !important;
+  font-weight: 700;
 }
 
 /* Yeseva One (--font-display) elements and their children always use 400 Regular */
@@ -220,7 +203,6 @@ h6 *:not(.font-body):not(.font-sans),
 .font-body *:not(.font-display):not(.font-price),
 .font-sans *:not(.font-display):not(.font-price) {
   font-family: var(--font-body) !important;
-  font-weight: 500 !important;
   font-synthesis: none;
 }
 
@@ -242,14 +224,9 @@ i {
   line-height: 1.75 !important;
 }
 
-/* Enforce 14px minimum text size across badges, captions, micro-labels, breadcrumbs, and tags */
-.text-xs,
-.text-\[9px\],
-.text-\[10px\],
-.text-\[11px\],
-.text-\[12px\],
-.text-\[13px\] {
-  font-size: 14px !important;
+/* Keep text-xs readable and well-proportioned without breaking small badges like -9% or 1/5 */
+.text-xs {
+  font-size: 0.8125rem;
   line-height: 1.5;
 }
 
