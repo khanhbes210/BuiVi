@@ -21,8 +21,6 @@ import {
   Copy,
   Check,
   ShoppingCart,
-  Store,
-  Clock,
   Award,
 } from 'lucide-react';
 import {
@@ -684,10 +682,10 @@ export const ProductDetailPage: React.FC = () => {
                             setIneligibleWarning(null);
                             setSelectedVoucherCode(isSelected ? null : code);
                           }}
-                          className={`text-xs px-2.5 py-1 rounded-sm border dashed font-semibold cursor-pointer transition-all ${
+                          className={`text-xs px-2.5 py-1 rounded-sm border dashed font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:scale-95 ${
                             isSelected
-                              ? 'bg-[#951722] text-[#FFF5E4] border-[#951722]'
-                              : 'bg-[#FFF5E4] text-[#951722] border-[#951722]/40 hover:border-[#951722]'
+                              ? 'bg-[#951722] text-[#FFF5E4] border-[#951722] shadow-xs'
+                              : 'bg-[#FFF5E4] text-[#951722] border-[#951722]/50 hover:bg-[#951722] hover:text-[#FFF5E4] hover:border-[#951722]'
                           }`}
                         >
                           Mã {code} {isSelected && '✓'}
@@ -748,10 +746,10 @@ export const ProductDetailPage: React.FC = () => {
                             key={pack}
                             type="button"
                             onClick={() => setSelectedPack(pack)}
-                            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold border text-left transition-all cursor-pointer flex items-center gap-2 ${
+                            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold border-2 text-left transition-all duration-200 cursor-pointer flex items-center gap-2 hover:-translate-y-0.5 active:scale-95 shadow-2xs ${
                               isSelected
-                                ? 'bg-[#FFF5E4] border-[#951722] text-[#951722] shadow-2xs ring-1 ring-[#951722]'
-                                : 'bg-white border-[#171815]/20 text-[#171815] hover:border-[#951722]/50'
+                                ? 'bg-[#FFF5E4] border-[#951722] text-[#951722] shadow-xs ring-1 ring-[#951722]'
+                                : 'bg-white border-[#171815]/20 text-[#171815] hover:border-[#951722] hover:bg-[#FFF5E4]/50'
                             }`}
                           >
                             <span>{pack}</span>
@@ -779,7 +777,7 @@ export const ProductDetailPage: React.FC = () => {
                         type="button"
                         onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                         aria-label="Giảm số lượng"
-                        className="w-8 h-8 flex items-center justify-center text-[#171815] hover:bg-[#951722]/10 active:scale-95 cursor-pointer transition-transform border-r border-[#171815]/20"
+                        className="w-8 h-8 flex items-center justify-center text-[#171815] hover:bg-[#951722] hover:text-[#FFF5E4] active:scale-95 cursor-pointer transition-all duration-200 border-r border-[#171815]/20"
                       >
                         <Minus className="w-3.5 h-3.5" />
                       </button>
@@ -792,7 +790,7 @@ export const ProductDetailPage: React.FC = () => {
                         type="button"
                         onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
                         aria-label="Tăng số lượng"
-                        className="w-8 h-8 flex items-center justify-center text-[#171815] hover:bg-[#951722]/10 active:scale-95 cursor-pointer transition-transform border-l border-[#171815]/20"
+                        className="w-8 h-8 flex items-center justify-center text-[#171815] hover:bg-[#951722] hover:text-[#FFF5E4] active:scale-95 cursor-pointer transition-all duration-200 border-l border-[#171815]/20"
                       >
                         <Plus className="w-3.5 h-3.5" />
                       </button>
@@ -831,33 +829,33 @@ export const ProductDetailPage: React.FC = () => {
 
               {/* SHOPEE DUAL CONVERSION ACTION BUTTONS */}
               <div ref={mainCtaRef} className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-3">
-                {/* Button 1: Thêm Vào Giỏ Hàng (Shopee style secondary red-tint button) */}
+                {/* Button 1: Thêm Vào Giỏ Hàng (Shopee style secondary button with sheen & lift) */}
                 <button
                   type="button"
                   onClick={handleAddToCart}
-                  className="min-h-[54px] rounded-xl font-bold text-sm sm:text-base border-2 border-[#951722] bg-[#FFF5E4] text-[#951722] hover:bg-[#951722]/15 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
+                  className="group/cta btn-sheen min-h-[56px] rounded-xl font-bold text-sm sm:text-base border-2 border-[#951722] bg-[#FFF5E4] text-[#951722] hover:bg-[#951722] hover:text-[#FFF5E4] hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2.5 cursor-pointer shadow-xs hover:shadow-md"
                 >
                   {justAdded ? (
                     <>
-                      <Check className="w-5 h-5 text-[#951722]" />
+                      <Check className="w-5 h-5 text-[#951722] group-hover:text-[#FFF5E4] transition-colors" />
                       <span>Đã Thêm Vào Giỏ!</span>
                     </>
                   ) : (
                     <>
-                      <ShoppingCart className="w-5 h-5 text-[#951722]" />
+                      <ShoppingCart className="w-5 h-5 text-[#951722] group-hover:text-[#FFF5E4] transition-colors" />
                       <span>Thêm Vào Giỏ Hàng</span>
                     </>
                   )}
                 </button>
 
-                {/* Button 2: Mua Ngay (Shopee style solid red primary CTA) */}
+                {/* Button 2: Mua Ngay (Shopee style solid red primary CTA with sheen, breathe & lift) */}
                 <button
                   type="button"
                   onClick={handleBuyNow}
-                  className="min-h-[54px] rounded-xl font-bold text-sm sm:text-base bg-[#951722] hover:bg-[#7C121C] text-[#FFF5E4] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                  className="group/cta btn-sheen btn-breathe min-h-[56px] rounded-xl font-bold text-sm sm:text-base bg-[#951722] hover:bg-[#7C121C] text-[#FFF5E4] hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-md hover:shadow-lg"
                 >
                   <span>Mua Ngay</span>
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="w-4 h-4 transition-transform group-hover/cta:translate-x-1" />
                 </button>
               </div>
 
@@ -869,64 +867,6 @@ export const ProductDetailPage: React.FC = () => {
                 </span>
               </div>
 
-            </div>
-          </div>
-        </div>
-
-        {/* SHOPEE SHOP INFO CARD (Official Store Banner) */}
-        <div className="bg-white rounded-2xl border border-[#951722]/15 shadow-sm p-4 sm:p-6 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-4 w-full md:w-auto">
-            <div className="w-16 h-16 rounded-full bg-[#951722] text-[#FFF5E4] flex items-center justify-center font-display text-xl font-bold border-2 border-[#F3D27A] shadow-xs shrink-0">
-              BÙI VỊ
-            </div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <h3 className="font-display font-bold text-base sm:text-lg text-[#171815]">
-                  BÙI VỊ – Tinh Hoa Nem Kinh Bắc
-                </h3>
-                <span className="bg-[#951722] text-[#FFF5E4] text-[10px] font-bold px-1.5 py-0.5 rounded uppercase">
-                  Mall
-                </span>
-              </div>
-              <p className="text-xs text-[#171815]/65 flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
-                <span>Online 2 phút trước • Làng nghề Bùi Xá, Ninh Xá, Bắc Ninh</span>
-              </p>
-              <div className="flex items-center gap-2 pt-1">
-                <Link
-                  to="/san-pham"
-                  className="px-3 py-1 rounded-md bg-[#FFF5E4] border border-[#951722]/30 text-[#951722] text-xs font-semibold hover:bg-[#951722] hover:text-[#FFF5E4] transition-colors flex items-center gap-1"
-                >
-                  <Store className="w-3.5 h-3.5" />
-                  <span>Xem Shop</span>
-                </Link>
-                <a
-                  href="tel:0988000000"
-                  className="px-3 py-1 rounded-md bg-white border border-[#171815]/20 text-[#171815] text-xs font-semibold hover:border-[#951722] transition-colors flex items-center gap-1"
-                >
-                  <Clock className="w-3.5 h-3.5 text-[#1F3D2A]" />
-                  <span>Hotline Tư Vấn</span>
-                </a>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full md:w-auto text-center md:text-left text-xs border-t md:border-t-0 md:border-l border-[#951722]/15 pt-4 md:pt-0 md:pl-6">
-            <div>
-              <span className="text-[#171815]/60 block">Đánh Giá</span>
-              <span className="font-bold text-[#951722] text-sm">4.9 / 5.0</span>
-            </div>
-            <div>
-              <span className="text-[#171815]/60 block">Sản Phẩm</span>
-              <span className="font-bold text-[#171815] text-sm">7 Đặc Sản</span>
-            </div>
-            <div>
-              <span className="text-[#171815]/60 block">Tỉ Lệ Phản Hồi</span>
-              <span className="font-bold text-[#1F3D2A] text-sm">100%</span>
-            </div>
-            <div>
-              <span className="text-[#171815]/60 block">Thời Gian Phản Hồi</span>
-              <span className="font-bold text-[#171815] text-sm">Trong vài phút</span>
             </div>
           </div>
         </div>
@@ -1024,16 +964,16 @@ export const ProductDetailPage: React.FC = () => {
 
             {/* Shopee Filter Pills */}
             <div className="flex-1 flex flex-wrap gap-2">
-              <span className="px-3.5 py-1.5 rounded-lg bg-[#951722] text-[#FFF5E4] text-xs font-semibold cursor-pointer shadow-2xs">
+              <span className="px-3.5 py-1.5 rounded-lg bg-[#951722] text-[#FFF5E4] text-xs font-semibold cursor-pointer shadow-xs hover:-translate-y-0.5 active:scale-95 transition-all duration-200">
                 Tất Cả (128)
               </span>
-              <span className="px-3.5 py-1.5 rounded-lg bg-white border border-[#171815]/20 text-[#171815] text-xs font-semibold hover:border-[#951722] cursor-pointer">
+              <span className="px-3.5 py-1.5 rounded-lg bg-white border border-[#171815]/20 text-[#171815] text-xs font-semibold hover:border-[#951722] hover:text-[#951722] hover:-translate-y-0.5 active:scale-95 cursor-pointer transition-all duration-200">
                 5 Sao (120)
               </span>
-              <span className="px-3.5 py-1.5 rounded-lg bg-white border border-[#171815]/20 text-[#171815] text-xs font-semibold hover:border-[#951722] cursor-pointer">
+              <span className="px-3.5 py-1.5 rounded-lg bg-white border border-[#171815]/20 text-[#171815] text-xs font-semibold hover:border-[#951722] hover:text-[#951722] hover:-translate-y-0.5 active:scale-95 cursor-pointer transition-all duration-200">
                 Có Hình Ảnh / Video (45)
               </span>
-              <span className="px-3.5 py-1.5 rounded-lg bg-white border border-[#171815]/20 text-[#171815] text-xs font-semibold hover:border-[#951722] cursor-pointer">
+              <span className="px-3.5 py-1.5 rounded-lg bg-white border border-[#171815]/20 text-[#171815] text-xs font-semibold hover:border-[#951722] hover:text-[#951722] hover:-translate-y-0.5 active:scale-95 cursor-pointer transition-all duration-200">
                 Có Bình Luận (88)
               </span>
             </div>
@@ -1136,15 +1076,15 @@ export const ProductDetailPage: React.FC = () => {
           <button
             type="button"
             onClick={handleAddToCart}
-            className="flex-1 min-h-[48px] rounded-xl font-bold text-xs border border-[#951722] bg-[#FFF5E4] text-[#951722] flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+            className="group/cta btn-sheen flex-1 min-h-[50px] rounded-xl font-bold text-xs border-2 border-[#951722] bg-[#FFF5E4] text-[#951722] hover:bg-[#951722] hover:text-[#FFF5E4] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
           >
-            <ShoppingCart className="w-4 h-4" />
+            <ShoppingCart className="w-4 h-4 text-[#951722] group-hover:text-[#FFF5E4] transition-colors" />
             <span>Thêm Vào Giỏ</span>
           </button>
           <button
             type="button"
             onClick={handleBuyNow}
-            className="flex-1 min-h-[48px] rounded-xl font-bold text-xs bg-[#951722] text-[#FFF5E4] flex items-center justify-center gap-1.5 cursor-pointer shadow-md"
+            className="group/cta btn-sheen btn-breathe flex-1 min-h-[50px] rounded-xl font-bold text-xs bg-[#951722] hover:bg-[#7C121C] text-[#FFF5E4] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer shadow-md"
           >
             <span>Mua Ngay</span>
           </button>
