@@ -36,7 +36,7 @@ jobs:
         run: npm run build
         env:
           NODE_ENV: production
-          BASE_PATH: /BuiVi/
+          BASE_PATH: ${{ hashFiles('public/CNAME') != '' && '/' || '/BuiVi/' }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
