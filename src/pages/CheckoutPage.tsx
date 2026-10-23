@@ -685,7 +685,7 @@ export const CheckoutPage: React.FC = () => {
                       {copiedField === 'all' ? (
                         <>
                           <Check className="w-3.5 h-3.5 text-[#F3D27A]" />
-                          <span>Đã sao chép</span>
+                          <span>Xong</span>
                         </>
                       ) : (
                         <>
@@ -713,7 +713,7 @@ export const CheckoutPage: React.FC = () => {
                       {copiedField === 'orderCode' ? (
                         <>
                           <Check className="w-3.5 h-3.5" />
-                          <span>Đã sao chép</span>
+                          <span>Xong</span>
                         </>
                       ) : (
                         <>
@@ -757,7 +757,7 @@ export const CheckoutPage: React.FC = () => {
                         {copiedField === 'accountNumber' ? (
                           <>
                             <Check className="w-3.5 h-3.5" />
-                            <span>Đã sao chép</span>
+                            <span>Xong</span>
                           </>
                         ) : (
                           <>
@@ -796,7 +796,7 @@ export const CheckoutPage: React.FC = () => {
                         {copiedField === 'amount' ? (
                           <>
                             <Check className="w-3.5 h-3.5" />
-                            <span>Đã sao chép</span>
+                            <span>Xong</span>
                           </>
                         ) : (
                           <>
@@ -832,7 +832,7 @@ export const CheckoutPage: React.FC = () => {
                         {copiedField === 'transferContent' ? (
                           <>
                             <Check className="w-3.5 h-3.5" />
-                            <span>Đã sao chép</span>
+                            <span>Xong</span>
                           </>
                         ) : (
                           <>

@@ -637,7 +637,7 @@ export const ArticleDetailPage: React.FC = () => {
               {copied ? (
                 <>
                   <Check className="w-3.5 h-3.5 text-[#1F3D2A]" />
-                  <span>Đã sao chép liên kết</span>
+                  <span>Xong</span>
                 </>
               ) : (
                 <>
@@ -710,8 +710,17 @@ export const ArticleDetailPage: React.FC = () => {
                   onClick={handleCopyLink}
                   className="w-full min-h-[42px] px-4 py-2 rounded-xl bg-[#FFF5E4] border border-[#951722]/30 text-xs text-[#171815] hover:border-[#951722] hover:text-[#951722] flex items-center justify-center gap-2 cursor-pointer transition-colors"
                 >
-                  <Link2 className="w-4 h-4 text-[#951722]" />
-                  <span>Chia sẻ (Sao chép liên kết)</span>
+                  {copied ? (
+                    <>
+                      <Check className="w-4 h-4 text-[#1F3D2A]" />
+                      <span className="font-semibold text-[#1F3D2A]">Xong</span>
+                    </>
+                  ) : (
+                    <>
+                      <Link2 className="w-4 h-4 text-[#951722]" />
+                      <span>Chia sẻ (Sao chép liên kết)</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -822,8 +831,17 @@ export const ArticleDetailPage: React.FC = () => {
                 onClick={handleCopyLink}
                 className="min-h-[42px] px-4 py-2 rounded-xl bg-[#FFFBF2] border border-[#951722]/30 text-sm text-[#951722] hover:bg-[#951722] hover:text-[#FFF5E4] inline-flex items-center gap-2 cursor-pointer transition-colors"
               >
-                <Link2 className="w-4 h-4" />
-                <span>Sao chép liên kết bài viết</span>
+                {copied ? (
+                  <>
+                    <Check className="w-4 h-4 text-[#1F3D2A]" />
+                    <span className="font-semibold text-[#1F3D2A]">Xong</span>
+                  </>
+                ) : (
+                  <>
+                    <Link2 className="w-4 h-4" />
+                    <span>Sao chép liên kết bài viết</span>
+                  </>
+                )}
               </button>
             </div>
 

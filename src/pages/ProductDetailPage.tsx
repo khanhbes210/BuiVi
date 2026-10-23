@@ -552,7 +552,7 @@ export const ProductDetailPage: React.FC = () => {
                       {copiedLink ? (
                         <>
                           <Check className="w-3.5 h-3.5 text-green-600" />
-                          <span className="text-[11px] text-green-700">Đã chép link</span>
+                          <span className="text-[11px] text-green-700">Xong</span>
                         </>
                       ) : (
                         <>
