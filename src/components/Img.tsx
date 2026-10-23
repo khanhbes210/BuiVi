@@ -238,11 +238,17 @@ export const Img: React.FC<ImgProps> = ({
     [theme, angleIndex, src]
   );
 
-  const isVirtualPlaceholder =
-    !src || src.startsWith('/images/') || src.includes('hero-banner-bui-vi');
   const [hasError, setHasError] = useState(false);
 
-  const effectiveSrc = isVirtualPlaceholder || hasError ? fallbackDataUri : src;
+  const resolvedSrc = useMemo(() => {
+    if (!src || src.endsWith('.svg') && src.includes('/products/')) return '';
+    if (src.startsWith('http://') || src.startsWith('https://') || src.startsWith('data:')) return src;
+    const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
+    const cleanPath = src.startsWith('/') ? src : `/${src}`;
+    return `${base}${cleanPath}`;
+  }, [src]);
+
+  const effectiveSrc = !resolvedSrc || hasError ? fallbackDataUri : resolvedSrc;
 
   return (
     <img

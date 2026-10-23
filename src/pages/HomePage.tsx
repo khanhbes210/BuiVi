@@ -197,6 +197,15 @@ export const HomePage: React.FC = () => {
         <AnimationSlot id="home-section-divider" />
       </div>
 
+      {/* Real 5-Slide Carousel Banner from pictures/ */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        <Reveal>
+          <div className="overflow-hidden rounded-2xl shadow-sm border border-[#951722]/20">
+            <MediaSlot slotId="home-hero-carousel" aspectRatio="4/1" />
+          </div>
+        </Reveal>
+      </div>
+
       {/* 2) SẢN PHẨM NỔI BẬT */}
       <section className="py-12 md:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         <div>

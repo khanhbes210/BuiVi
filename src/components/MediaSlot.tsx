@@ -13,6 +13,7 @@ import { PRODUCTS, formatPrice, getDiscountPercent } from '../data/products';
 import { Img } from './Img';
 import { AddToCartButton } from './AddToCartButton';
 import { BuyNowButton } from './BuyNowButton';
+import { resolveAssetUrl } from '../utils/assets';
 import { MOTION_TOKENS, useMotionPreferences } from '../motion';
 
 interface MediaSlotProps {
@@ -134,7 +135,7 @@ export const MediaSlot: React.FC<MediaSlotProps> = ({
           >
             {hasRealSlideSrc ? (
               <img
-                src={currentSlide.src}
+                src={resolveAssetUrl(currentSlide.src)}
                 alt={currentSlide.alt}
                 className="w-full h-full object-cover"
               />
@@ -283,9 +284,9 @@ export const MediaSlot: React.FC<MediaSlotProps> = ({
   if ((type === 'banner' || type === 'poster') && src && !imgError) {
     const mediaImage = (
       <picture className="w-full h-full block">
-        {mobileSrc && <source media="(max-width: 767px)" srcSet={mobileSrc} />}
+        {mobileSrc && <source media="(max-width: 767px)" srcSet={resolveAssetUrl(mobileSrc)} />}
         <img
-          src={src}
+          src={resolveAssetUrl(src)}
           alt={alt}
           onError={() => setImgError(true)}
           className="w-full h-full object-cover"

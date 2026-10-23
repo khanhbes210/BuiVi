@@ -697,16 +697,20 @@ export const Header: React.FC = () => {
                     <Link
                       key={v.code}
                       to={`/khuyen-mai#ma-voucher-${v.code}`}
-                      className="p-3 rounded-xl bg-[#FFF5E4] border border-[#951722]/25 hover:border-[#951722] flex items-center justify-between gap-2 group"
+                      className="p-3 rounded-xl bg-[#FFF5E4] hover:bg-[#FFF0D4] border border-[#951722]/25 hover:border-[#951722] flex items-center justify-between gap-3 group transition-colors min-h-[72px] overflow-hidden"
                     >
-                      <div>
-                        <span className="font-display text-xs bg-[#1F3D2A] text-[#FFF5E4] px-2 py-0.5 rounded">
-                          {v.code}
-                        </span>
-                        <span className="ml-2 font-price text-sm text-[#9B0514]">
-                          – {v.valueText}
-                        </span>
-                        <p className="font-display text-xs text-[#171815]/80 mt-1 line-clamp-1">{v.title}</p>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="font-bold text-[11px] bg-[#1F3D2A] text-[#FFF5E4] px-2 py-0.5 rounded tracking-wide">
+                            {v.code}
+                          </span>
+                          <span className="font-price font-bold text-sm text-[#9B0514]">
+                            – {v.valueText}
+                          </span>
+                        </div>
+                        <p className="text-xs text-[#171815]/75 mt-1 leading-snug line-clamp-2" title={v.title}>
+                          {v.title}
+                        </p>
                       </div>
                       <ArrowRight className="w-4 h-4 text-[#951722] shrink-0 group-hover:translate-x-1 transition-transform" />
                     </Link>
