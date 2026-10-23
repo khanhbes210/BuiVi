@@ -8,7 +8,6 @@ import {
   Trash2,
   Plus,
   Minus,
-  ArrowLeft,
   ArrowRight,
   Gift,
   Sparkles,
@@ -75,25 +74,29 @@ export const MiniCartDrawer: React.FC = () => {
             className="w-full sm:max-w-lg md:max-w-[540px] bg-[#FFF5E4] h-full shadow-2xl border-l-2 border-[#951722]/30 flex flex-col justify-between overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Top Header with clean Back button, Logo and Cart count badge */}
+            {/* Top Header with Brand Logo, Cart count badge and Close button */}
             <div className="p-4 sm:p-5 bg-[#FFFBF2] border-b border-[#951722]/20">
               <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setMiniCartOpen(false)}
-                    aria-label="Tiếp tục xem và mua sắm"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#FFF5E4] hover:bg-[#951722] text-[#1F3D2A] hover:text-[#FFF5E4] border border-[#1F3D2A]/20 hover:border-[#951722] text-xs font-bold transition-all duration-200 cursor-pointer shadow-2xs hover:-translate-y-0.5 active:scale-95"
-                  >
-                    <ArrowLeft className="w-3.5 h-3.5" />
-                    <span>Tiếp tục xem</span>
-                  </button>
-                  <Link to="/" onClick={() => setMiniCartOpen(false)} className="shrink-0">
-                    <Logo variant="main" className="scale-80 origin-left" />
-                  </Link>
-                </div>
+                <Link
+                  to="/"
+                  onClick={() => setMiniCartOpen(false)}
+                  className="flex items-center gap-3 group"
+                >
+                  <Logo
+                    variant="main"
+                    imgClassName="!min-h-0 h-10 sm:h-12 w-auto transition-transform group-hover:scale-105"
+                  />
+                  <div>
+                    <span className="font-display font-bold text-base sm:text-lg text-[#951722] tracking-wider block leading-tight">
+                      BÙI VỊ
+                    </span>
+                    <span className="text-[10px] sm:text-[11px] text-[#1F3D2A] uppercase tracking-wider font-semibold block">
+                      Quà Biếu Di Sản
+                    </span>
+                  </div>
+                </Link>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <div className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#951722] bg-[#951722]/10 px-3 py-1 rounded-full border border-[#951722]/20">
                     <ShoppingBag className="w-4 h-4" />
                     <span>Giỏ hàng ({totalCartItemsCount})</span>
