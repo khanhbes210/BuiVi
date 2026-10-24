@@ -5,7 +5,7 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(({ mode }) => {
   return {
-    base: process.env.BASE_PATH || (mode === 'production' ? '/BuiVi/' : '/'),
+    base: process.env.BASE_PATH || (process.env.VERCEL ? '/' : (mode === 'production' ? '/BuiVi/' : '/')),
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
