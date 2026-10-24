@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import {
@@ -31,9 +31,26 @@ import {
 
 export const HomePage: React.FC = () => {
   const { canKenBurns: allowKenBurns } = useMotionPreferences();
+  const [readingProgress, setReadingProgress] = useState(0);
 
   useEffect(() => {
     document.title = 'BÙI VỊ – Một miền vun đắp, một vị lưu hương | Quà Biếu Nem Kinh Bắc Di Sản';
+  }, []);
+
+  useEffect(() => {
+    const updateReadingProgress = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const ratio = docHeight > 0 ? Math.min(1, Math.max(0, scrollTop / docHeight)) : 0;
+      setReadingProgress(ratio);
+    };
+    window.addEventListener('scroll', updateReadingProgress, { passive: true });
+    window.addEventListener('resize', updateReadingProgress, { passive: true });
+    updateReadingProgress();
+    return () => {
+      window.removeEventListener('scroll', updateReadingProgress);
+      window.removeEventListener('resize', updateReadingProgress);
+    };
   }, []);
 
   // All 7 featured products (3 single nem + 3 gift sets + Combo 3 hộp quà)
@@ -46,6 +63,18 @@ export const HomePage: React.FC = () => {
 
   return (
     <div>
+      {/* Top Heritage Red & Gold Reading Progress Bar on HomePage */}
+      <div
+        aria-hidden="true"
+        data-testid="home-reading-progress-bar"
+        className="fixed top-0 left-0 right-0 h-[3.5px] z-[60] bg-[#1F3D2A]/15 pointer-events-none"
+      >
+        <div
+          className="h-full bg-gradient-to-r from-[#951722] via-[#9B0514] to-[#F3D27A] origin-left transition-transform duration-150"
+          style={{ transform: `scaleX(${readingProgress})` }}
+        />
+      </div>
+
       {/* 1) HERO BANNER SECTION (Cream background #FFF5E4, Ink text #171815, Heritage Red headings #951722) */}
       <section className="relative bg-[#FFF5E4] text-[#171815] overflow-hidden border-b-2 border-[#951722]/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16">

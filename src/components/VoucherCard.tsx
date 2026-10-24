@@ -67,7 +67,7 @@ export const VoucherCard: React.FC<VoucherCardProps> = ({
       lang="vi"
       data-testid={`voucher-box-${voucher.code}`}
       className={`group flex-1 w-full ${
-        compact ? 'h-full min-h-[526px]' : 'h-[920px] min-h-[920px]'
+        compact ? 'h-[516px] min-h-[516px]' : 'h-[900px] min-h-[900px]'
       } bg-[#FFFBF2] border-2 rounded-2xl overflow-hidden shadow-xs flex flex-col justify-between relative transition-all duration-300 md:hover:-translate-y-1 hover:shadow-md ${
         highlighted
           ? 'border-[#951722] ring-4 ring-[#951722]/30 shadow-xl voucher-hash-pulse'
@@ -129,31 +129,31 @@ export const VoucherCard: React.FC<VoucherCardProps> = ({
         </div>
       </div>
 
-      {/* Body Details — relative container so Detailed Terms opens as an in-card overlay without resizing the card */}
-      <div className="p-5 flex-1 flex flex-col justify-between gap-4 relative overflow-hidden">
-        <div className="flex-1 flex flex-col justify-between space-y-2.5 text-sm text-[#171815]">
-          <div className="flex items-center justify-between gap-2 py-1 min-h-[34px] shrink-0 border-b border-[#951722]/10">
+      {/* Body Details — relative container with balanced spacing so buttons never overflow */}
+      <div className="p-5 flex-1 min-h-0 flex flex-col justify-between gap-3 relative overflow-hidden">
+        <div className="flex-1 min-h-0 flex flex-col justify-between space-y-2 text-sm text-[#171815]">
+          <div className="flex items-center justify-between gap-2 py-1 min-h-[32px] shrink-0 border-b border-[#951722]/10">
             <span className="text-[#171815]/70">Đơn tối thiểu:</span>
             <span className="font-semibold font-price text-right">
               {voucher.minOrder > 0 ? formatPrice(voucher.minOrder) : '0đ (Không yêu cầu)'}
             </span>
           </div>
-          <div className="flex items-center justify-between gap-2 py-1 min-h-[34px] shrink-0 border-b border-[#951722]/10">
+          <div className="flex items-center justify-between gap-2 py-1 min-h-[32px] shrink-0 border-b border-[#951722]/10">
             <span className="text-[#171815]/70">Mức ưu đãi tối đa:</span>
             <span className="font-semibold font-price text-[#9B0514] text-right">
               {formatPrice(voucher.maxDiscount)}
             </span>
           </div>
-          <div className="py-1 min-h-[76px] shrink-0 flex flex-col justify-center border-b border-[#951722]/10">
+          <div className="py-1 min-h-[68px] shrink-0 flex flex-col justify-center border-b border-[#951722]/10">
             <span className="text-[#171815]/70 block mb-0.5">Sản phẩm áp dụng:</span>
             <p
               lang="vi"
-              className="story-justify font-medium text-[#1F3D2A] leading-[1.65] line-clamp-2 h-[46px] min-h-[46px]"
+              className="story-justify font-medium text-[#1F3D2A] leading-[1.55] line-clamp-2 h-[44px] min-h-[44px]"
             >
               {voucher.applicableProductsText}
             </p>
           </div>
-          <div className="flex items-center justify-between gap-2 py-1 min-h-[34px] shrink-0 border-b border-[#951722]/10">
+          <div className="flex items-center justify-between gap-2 py-1 min-h-[32px] shrink-0 border-b border-[#951722]/10">
             <span className="text-[#171815]/70">Thời hạn ưu đãi:</span>
             <span className="font-medium text-right">{voucher.expiryDisplay}</span>
           </div>
@@ -170,35 +170,35 @@ export const VoucherCard: React.FC<VoucherCardProps> = ({
             </div>
           ) : (
             <>
-              <div className="py-1 min-h-[76px] shrink-0 flex flex-col justify-center border-b border-[#951722]/10">
+              <div className="py-1 min-h-[68px] shrink-0 flex flex-col justify-center border-b border-[#951722]/10">
                 <span className="text-[#171815]/70 block mb-0.5">Quy định cộng gộp:</span>
                 <p
                   lang="vi"
-                  className="story-justify font-medium leading-[1.65] line-clamp-2 h-[46px] min-h-[46px]"
+                  className="story-justify font-medium leading-[1.55] line-clamp-2 h-[44px] min-h-[44px]"
                 >
                   {voucher.stackableText}
                 </p>
               </div>
-              <div className="py-1 min-h-[54px] shrink-0 flex flex-col justify-center border-b border-[#951722]/10">
+              <div className="py-1 min-h-[48px] shrink-0 flex flex-col justify-center border-b border-[#951722]/10">
                 <span className="text-[#171815]/70 block mb-0.5">Giới hạn lượt dùng:</span>
                 <p
                   lang="vi"
-                  className="story-justify font-medium leading-[1.65] line-clamp-1 h-[24px] min-h-[24px]"
+                  className="story-justify font-medium leading-[1.55] line-clamp-1 h-[22px] min-h-[22px]"
                 >
                   {voucher.usageLimit}
                 </p>
               </div>
 
               {/* 3-step How to use — flex-1 so sibling cards align at the bottom */}
-              <div className="flex-1 flex flex-col justify-between bg-[#FFF5E4] p-3.5 rounded-xl border border-[#951722]/20 min-h-[188px]">
-                <span className="font-bold text-xs uppercase tracking-wider text-[#951722] mb-1.5 block">
+              <div className="flex-1 min-h-[148px] flex flex-col justify-between bg-[#FFF5E4] p-3.5 rounded-xl border border-[#951722]/20">
+                <span className="font-bold text-xs uppercase tracking-wider text-[#951722] mb-1 block">
                   Cách sử dụng (3 bước):
                 </span>
-                <ol className="space-y-1.5 text-xs text-[#171815]/90 my-auto">
+                <ol className="space-y-1 text-xs text-[#171815]/90 my-auto">
                   {voucher.howToUse.map((step, idx) => (
                     <li
                       key={idx}
-                      className="story-justify leading-[1.6] line-clamp-2"
+                      className="story-justify leading-[1.55] line-clamp-2"
                       lang="vi"
                     >
                       {step}
@@ -244,7 +244,7 @@ export const VoucherCard: React.FC<VoucherCardProps> = ({
                 duration: MOTION_TOKENS.durations.fast,
                 ease: MOTION_TOKENS.easings.standard,
               }}
-              className="absolute inset-x-4 top-3 bottom-[78px] z-20 rounded-2xl bg-[#FFFBF2] border-2 border-[#1F3D2A] shadow-xl flex flex-col overflow-hidden"
+              className="absolute inset-x-4 top-3 bottom-[76px] z-20 rounded-2xl bg-[#FFFBF2] border-2 border-[#1F3D2A] shadow-xl flex flex-col overflow-hidden"
             >
               <div className="bg-[#1F3D2A] text-[#FFF5E4] px-4 py-2.5 flex items-center justify-between gap-2 shrink-0">
                 <div className="flex items-center gap-2 min-w-0">
@@ -305,12 +305,12 @@ export const VoucherCard: React.FC<VoucherCardProps> = ({
           )}
         </AnimatePresence>
 
-        {/* Two Action Buttons */}
-        <div className="pt-2 shrink-0 flex flex-wrap gap-2.5 relative z-10">
+        {/* Two Action Buttons — 2-column grid with min-w-0 so buttons never overflow horizontally or vertically */}
+        <div className="pt-1 shrink-0 grid grid-cols-2 gap-2.5 w-full relative z-10">
           <button
             type="button"
             onClick={handleUseVoucher}
-            className={`btn-sheen flex-1 min-w-[160px] min-h-[52px] px-6 py-2.5 rounded-xl font-bold text-[17px] leading-[1.3] transition-all flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer active:scale-[0.98] ${
+            className={`btn-sheen w-full min-w-0 min-h-[48px] px-3.5 sm:px-4 py-2 rounded-xl font-bold text-[15px] sm:text-[16px] leading-[1.3] transition-all flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer active:scale-[0.98] ${
               isSaved
                 ? 'bg-[#1F3D2A] text-[#FFF5E4] border-2 border-[#1F3D2A]'
                 : 'border-2 border-[#1F3D2A] text-[#1F3D2A] hover:bg-[#1F3D2A] hover:text-[#FFF5E4]'
@@ -318,14 +318,18 @@ export const VoucherCard: React.FC<VoucherCardProps> = ({
           >
             {isSaved ? (
               <>
-                <Check className="w-5 h-5 shrink-0" />
+                <Check className="w-4 h-4 shrink-0" />
                 <span>Đã lưu mã</span>
               </>
             ) : (
               <span>Dùng mã này</span>
             )}
           </button>
-          <BuyNowButton onClick={handleBuyNowEligible} className="flex-1" />
+          <BuyNowButton
+            onClick={handleBuyNowEligible}
+            size="sm"
+            className="w-full !min-w-0 !min-h-[48px] !px-3.5 sm:!px-4 !py-2 !text-[15px] sm:!text-[16px]"
+          />
         </div>
       </div>
     </article>
