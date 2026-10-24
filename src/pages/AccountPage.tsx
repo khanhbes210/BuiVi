@@ -16,6 +16,7 @@ import {
 import { useStore, UserAddress } from '../context/StoreContext';
 import { formatCurrency } from '../data/products';
 import { FeaturedProductsBlock } from '../components/FeaturedProductsBlock';
+import { HeritageDropdown, PROVINCE_OPTIONS } from '../components/HeritageDropdown';
 
 export const AccountPage: React.FC = () => {
   const { subpage } = useParams<{ subpage?: string }>();
@@ -698,12 +699,16 @@ export const AccountPage: React.FC = () => {
                           />
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                          <input
-                            type="text"
-                            placeholder="Tỉnh/Thành phố"
+                          <HeritageDropdown
                             value={addrProvince}
-                            onChange={(e) => setAddrProvince(e.target.value)}
-                            className="px-3.5 py-2 rounded-xl bg-[#FFFBF2] border border-[#951722]/30 text-sm"
+                            onChange={(val) => setAddrProvince(val)}
+                            options={PROVINCE_OPTIONS}
+                            placeholder="Chọn Tỉnh/Thành phố"
+                            headerTitle="Chọn Tỉnh / Thành phố"
+                            triggerTestId="account-province-trigger"
+                            listboxTestId="account-province-listbox"
+                            optionTestIdPrefix="account-province-option"
+                            size="sm"
                           />
                           <input
                             type="text"

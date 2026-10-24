@@ -22,6 +22,7 @@ import { SITE_CONFIG, shouldShowPaymentFailDemo } from '../data/siteConfig';
 import { formatCurrency, formatPrice, getDiscountPercent } from '../data/products';
 import { PromotionSummary } from '../components/PromotionSummary';
 import { CheckoutStepper } from '../components/CheckoutStepper';
+import { HeritageDropdown, PROVINCE_OPTIONS } from '../components/HeritageDropdown';
 import { Img } from '../components/Img';
 import {
   AnimatedPrice,
@@ -485,26 +486,19 @@ export const CheckoutPage: React.FC = () => {
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                      <label
-                        htmlFor="chk-province"
-                        className="block text-sm font-bold text-[#171815] mb-1.5"
-                      >
+                      <label className="block text-sm font-bold text-[#171815] mb-1.5">
                         Tỉnh / Thành phố *
                       </label>
-                      <select
-                        id="chk-province"
+                      <HeritageDropdown
                         value={province}
-                        onChange={(e) => setProvince(e.target.value)}
-                        className="w-full min-h-[48px] px-3 py-2.5 rounded-xl bg-[#FFF5E4] border border-[#951722]/30 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#951722]"
-                      >
-                        <option value="TP. Hà Nội">TP. Hà Nội</option>
-                        <option value="Tỉnh Bắc Ninh">Tỉnh Bắc Ninh</option>
-                        <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
-                        <option value="TP. Hải Phòng">TP. Hải Phòng</option>
-                        <option value="Tỉnh Quảng Ninh">Tỉnh Quảng Ninh</option>
-                        <option value="TP. Đà Nẵng">TP. Đà Nẵng</option>
-                        <option value="Tỉnh/Thành khác">Tỉnh / Thành phố khác</option>
-                      </select>
+                        onChange={(val) => setProvince(val)}
+                        options={PROVINCE_OPTIONS}
+                        headerTitle="Chọn Tỉnh / Thành phố"
+                        triggerTestId="checkout-province-trigger"
+                        listboxTestId="checkout-province-listbox"
+                        optionTestIdPrefix="checkout-province-option"
+                        size="sm"
+                      />
                       {errors.province && (
                         <p className="text-xs font-semibold text-[#9B0514] mt-1">
                           {errors.province}

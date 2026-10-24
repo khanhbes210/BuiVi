@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
-import { Search, X, Ticket, ArrowRight } from 'lucide-react';
-import { PRODUCTS, removeVietnameseTones } from '../data/products';
+import { Search, X, Ticket, ArrowRight, ArrowUpDown } from 'lucide-react';
+import { PRODUCTS, removeVietnameseTones, getDiscountPercent } from '../data/products';
 import { VOUCHERS } from '../data/vouchers';
 import { ProductCard } from '../components/ProductCard';
 import { FeaturedProductsBlock } from '../components/FeaturedProductsBlock';
+import { HeritageDropdown, HeritageDropdownOption } from '../components/HeritageDropdown';
 import {
   AnimationSlot,
   Reveal,
@@ -15,6 +16,35 @@ import {
 } from '../motion';
 
 type TabGroup = 'san-pham' | 'set-qua-bieu';
+type SortOption = 'default' | 'price-asc' | 'price-desc' | 'discount-desc' | 'bestseller';
+
+const SORT_OPTIONS: HeritageDropdownOption[] = [
+  {
+    value: 'default',
+    label: 'Mặc định (Tinh tuyển Bùi Vị)',
+    subtitle: 'Thứ tự gợi ý chuẩn bộ sưu tập di sản',
+  },
+  {
+    value: 'bestseller',
+    label: 'Bán chạy nhất',
+    subtitle: 'Ưu tiên các thức quà được chọn mua nhiều nhất',
+  },
+  {
+    value: 'price-asc',
+    label: 'Giá: Thấp đến Cao',
+    subtitle: 'Từ 85.000đ đến 870.000đ',
+  },
+  {
+    value: 'price-desc',
+    label: 'Giá: Cao đến Thấp',
+    subtitle: 'Ưu tiên Combo & Set quà biếu cao cấp',
+  },
+  {
+    value: 'discount-desc',
+    label: 'Ưu đãi nhiều nhất (% giảm)',
+    subtitle: 'Sắp xếp theo mức tiết kiệm cao nhất',
+  },
+];
 
 export const ProductListPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -38,6 +68,7 @@ export const ProductListPage: React.FC = () => {
 
   const [rawQuery, setRawQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [sortBy, setSortBy] = useState<SortOption>('default');
 
   // Debounce instant search by 200ms
   useEffect(() => {
@@ -80,17 +111,42 @@ export const ProductListPage: React.FC = () => {
     return PRODUCTS.filter((p) => p.isGiftSet);
   }, [activeTab]);
 
-  // Accent-insensitive search within currently selected tab (searches name, shortDesc, category)
+  // Accent-insensitive search + custom sorting within currently selected tab
   const filteredProducts = useMemo(() => {
     const q = removeVietnameseTones(debouncedQuery.trim());
-    if (!q) return tabProducts;
-    return tabProducts.filter((product) => {
-      const nameNorm = removeVietnameseTones(product.name);
-      const descNorm = removeVietnameseTones(product.shortDesc);
-      const catNorm = removeVietnameseTones(product.category);
-      return nameNorm.includes(q) || descNorm.includes(q) || catNorm.includes(q);
-    });
-  }, [tabProducts, debouncedQuery]);
+    const base = !q
+      ? [...tabProducts]
+      : tabProducts.filter((product) => {
+          const nameNorm = removeVietnameseTones(product.name);
+          const descNorm = removeVietnameseTones(product.shortDesc);
+          const catNorm = removeVietnameseTones(product.category);
+          return nameNorm.includes(q) || descNorm.includes(q) || catNorm.includes(q);
+        });
+
+    if (sortBy === 'price-asc') {
+      return [...base].sort((a, b) => a.price - b.price);
+    }
+    if (sortBy === 'price-desc') {
+      return [...base].sort((a, b) => b.price - a.price);
+    }
+    if (sortBy === 'discount-desc') {
+      return [...base].sort((a, b) => {
+        const discA = getDiscountPercent(a.price, a.oldPrice) || 0;
+        const discB = getDiscountPercent(b.price, b.oldPrice) || 0;
+        if (discB !== discA) return discB - discA;
+        return b.price - a.price;
+      });
+    }
+    if (sortBy === 'bestseller') {
+      return [...base].sort((a, b) => {
+        const bestA = a.isBestSeller || a.bestSeller ? 1 : 0;
+        const bestB = b.isBestSeller || b.bestSeller ? 1 : 0;
+        if (bestB !== bestA) return bestB - bestA;
+        return a.price - b.price;
+      });
+    }
+    return base;
+  }, [tabProducts, debouncedQuery, sortBy]);
 
   // 3 suggested products for empty state
   const suggestedProducts = useMemo(() => {
@@ -176,8 +232,8 @@ export const ProductListPage: React.FC = () => {
           </Link>
         </div>
 
-        {/* 4) Search Bar (height 52px, search icon, clear "x" button scales in, instant debounced accent-insensitive search) */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        {/* 4) Search Bar + Custom Heritage Sort Dropdown */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3.5">
           <div className="relative flex-1">
             <Search className="w-5 h-5 text-[#951722] absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
@@ -210,11 +266,28 @@ export const ProductListPage: React.FC = () => {
             </AnimatePresence>
           </div>
 
-          <div
-            aria-live="polite"
-            className="text-sm font-bold text-[#1F3D2A] whitespace-nowrap shrink-0 px-1"
-          >
-            Tìm thấy {filteredProducts.length} sản phẩm
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 shrink-0">
+            <div className="w-full sm:w-[275px]">
+              <HeritageDropdown
+                value={sortBy}
+                onChange={(val) => setSortBy(val as SortOption)}
+                options={SORT_OPTIONS}
+                headerTitle="Sắp xếp bộ sưu tập"
+                headerBadge="5 tiêu chí"
+                triggerTestId="product-sort-trigger"
+                listboxTestId="product-sort-listbox"
+                optionTestIdPrefix="product-sort-option"
+                size="sm"
+                icon={<ArrowUpDown className="w-4 h-4 text-[#951722]" />}
+              />
+            </div>
+
+            <div
+              aria-live="polite"
+              className="text-sm font-bold text-[#1F3D2A] whitespace-nowrap shrink-0 px-1"
+            >
+              Tìm thấy {filteredProducts.length} sản phẩm
+            </div>
           </div>
         </div>
 
@@ -250,7 +323,7 @@ export const ProductListPage: React.FC = () => {
                 <h3 className="font-display text-xl text-[#951722]">
                   Gợi ý 3 sản phẩm bán chạy của Bùi Vị
                 </h3>
-                <Stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
+                <Stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7 items-stretch">
                   {suggestedProducts.map((product) => (
                     <ProductCard key={product.id} product={product} />
                   ))}
@@ -259,13 +332,13 @@ export const ProductListPage: React.FC = () => {
             </motion.div>
           ) : (
             <motion.div
-              key={`${activeTab}-${debouncedQuery}`}
+              key={`${activeTab}-${debouncedQuery}-${sortBy}`}
               initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.26, ease: MOTION_TOKENS.easings.standard }}
             >
-              <Stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
+              <Stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7 items-stretch">
                 {filteredProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}

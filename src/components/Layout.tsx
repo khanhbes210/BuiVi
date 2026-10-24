@@ -7,6 +7,7 @@ import { PageNavBar } from './PageNavBar';
 import { Footer } from './Footer';
 import { MiniCartDrawer } from './MiniCartDrawer';
 import { SearchOverlay } from './SearchOverlay';
+import { ProductQuickViewModal } from './ProductQuickViewModal';
 import { Img } from './Img';
 import { useStore } from '../context/StoreContext';
 import { formatPrice } from '../data/products';
@@ -96,6 +97,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
         <MiniCartDrawer />
         <SearchOverlay />
+        <ProductQuickViewModal />
 
         {/* Fly-to-Cart Curved Flight Thumbnail (48px circle, 450ms) */}
         <AnimatePresence>

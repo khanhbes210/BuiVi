@@ -96,6 +96,7 @@ export const Stagger: React.FC<StaggerProps> = ({
           key={(child as React.ReactElement)?.key ?? idx}
           delay={getStaggerDelay(idx, baseDelay)}
           once={once}
+          className="h-full"
         >
           {child}
         </Reveal>

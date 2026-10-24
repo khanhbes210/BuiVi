@@ -135,22 +135,24 @@ export const AboutPage: React.FC = () => {
             </div>
           </Reveal>
 
-          <Stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
             {ABOUT_CONTENT.commitmentsSection.items.map((item, idx) => (
               <div
                 key={item.id}
-                className="bg-[#FFFBF2] border-2 border-[#951722]/25 rounded-2xl p-6 space-y-3 transition-transform duration-300 md:hover:-translate-y-1 hover:shadow-md"
+                className="h-full bg-[#FFFBF2] border-2 border-[#951722]/25 rounded-2xl p-6 flex flex-col justify-between space-y-3 transition-transform duration-300 md:hover:-translate-y-1 hover:shadow-md"
               >
-                <div
-                  className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                    idx % 2 === 0
-                      ? 'bg-[#951722]/10 text-[#951722]'
-                      : 'bg-[#1F3D2A]/10 text-[#1F3D2A]'
-                  }`}
-                >
-                  {renderCommitmentIcon(item.iconType)}
+                <div className="space-y-3">
+                  <div
+                    className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                      idx % 2 === 0
+                        ? 'bg-[#951722]/10 text-[#951722]'
+                        : 'bg-[#1F3D2A]/10 text-[#1F3D2A]'
+                    }`}
+                  >
+                    {renderCommitmentIcon(item.iconType)}
+                  </div>
+                  <h3 className="font-display text-xl text-[#171815] min-h-[52px]">{item.title}</h3>
                 </div>
-                <h3 className="font-display text-xl text-[#171815]">{item.title}</h3>
                 <p lang="vi" className="story-justify text-sm text-[#171815]/85 leading-[1.7]">
                   {item.description}
                 </p>
@@ -186,14 +188,16 @@ export const AboutPage: React.FC = () => {
             </Reveal>
           </div>
 
-          <Stagger className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <Stagger className="grid grid-cols-1 md:grid-cols-4 gap-6 items-stretch">
             {ABOUT_CONTENT.timelineSection.steps.map((item, idx) => (
               <div
                 key={idx}
-                className="p-5 rounded-2xl bg-[#FFF5E4]/10 border border-[#F3D27A]/35 space-y-2"
+                className="h-full p-5 rounded-2xl bg-[#FFF5E4]/10 border border-[#F3D27A]/35 flex flex-col justify-between space-y-2"
               >
-                <span className="font-price text-sm font-bold text-[#F3D27A]">{item.step}</span>
-                <h3 className="font-display text-xl text-[#FFF5E4]">{item.title}</h3>
+                <div className="space-y-2">
+                  <span className="font-price text-sm font-bold text-[#F3D27A] block">{item.step}</span>
+                  <h3 className="font-display text-xl text-[#FFF5E4] min-h-[52px]">{item.title}</h3>
+                </div>
                 <p lang="vi" className="story-justify text-sm text-[#FFF5E4]/85 leading-[1.7]">
                   {item.description}
                 </p>
@@ -218,7 +222,7 @@ export const AboutPage: React.FC = () => {
             </div>
           </Reveal>
 
-          <Stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
+          <Stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7 items-stretch">
             {suggestedProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}

@@ -262,7 +262,7 @@ export const HomePage: React.FC = () => {
             </div>
           </Reveal>
 
-          <Stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
+          <Stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7 items-stretch">
             {featuredProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -450,24 +450,30 @@ export const HomePage: React.FC = () => {
               </Stagger>
             </div>
 
-            <Stagger className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-              <div className="p-3.5 rounded-xl bg-[#FFF5E4] border border-[#951722]/20">
-                <ShieldCheck className="w-5 h-5 text-[#951722] mb-1" />
-                <p className="font-display text-[18px] text-[#951722]">Thính gạo rang củi</p>
+            <Stagger className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 items-stretch">
+              <div className="h-full p-3.5 rounded-xl bg-[#FFF5E4] border border-[#951722]/20 flex flex-col justify-between">
+                <div>
+                  <ShieldCheck className="w-5 h-5 text-[#951722] mb-1" />
+                  <p className="font-display text-[18px] text-[#951722]">Thính gạo rang củi</p>
+                </div>
                 <p className="text-sm text-[#171815]/80 mt-0.5">
                   Nếp cái hoa vàng dậy hương bùi thơm chuẩn vị Kinh Bắc
                 </p>
               </div>
-              <div className="p-3.5 rounded-xl bg-[#FFF5E4] border border-[#951722]/20">
-                <Sparkles className="w-5 h-5 text-[#951722] mb-1" />
-                <p className="font-display text-[18px] text-[#951722]">Giấy Điệp vỏ sò</p>
+              <div className="h-full p-3.5 rounded-xl bg-[#FFF5E4] border border-[#951722]/20 flex flex-col justify-between">
+                <div>
+                  <Sparkles className="w-5 h-5 text-[#951722] mb-1" />
+                  <p className="font-display text-[18px] text-[#951722]">Giấy Điệp vỏ sò</p>
+                </div>
                 <p className="text-sm text-[#171815]/80 mt-0.5">
                   Óng ánh sắc trắng ngà tự nhiên từ làng tranh Đông Hồ
                 </p>
               </div>
-              <div className="p-3.5 rounded-xl bg-[#FFF5E4] border border-[#951722]/20">
-                <Gift className="w-5 h-5 text-[#951722] mb-1" />
-                <p className="font-display text-[18px] text-[#951722]">Hộp mở thành tranh</p>
+              <div className="h-full p-3.5 rounded-xl bg-[#FFF5E4] border border-[#951722]/20 flex flex-col justify-between">
+                <div>
+                  <Gift className="w-5 h-5 text-[#951722] mb-1" />
+                  <p className="font-display text-[18px] text-[#951722]">Hộp mở thành tranh</p>
+                </div>
                 <p className="text-sm text-[#171815]/80 mt-0.5">
                   Cấu trúc hộp lục giác độc bản lưu giữ làm tranh treo
                 </p>
@@ -542,11 +548,11 @@ export const HomePage: React.FC = () => {
             </div>
           </Reveal>
 
-          <Stagger className="grid grid-cols-1 md:grid-cols-3 gap-7">
+          <Stagger className="grid grid-cols-1 md:grid-cols-3 gap-7 items-stretch">
             {latestArticles.map((article) => (
               <article
                 key={article.id}
-                className="bg-[#FFFBF2] border border-[#951722]/25 rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 md:hover:-translate-y-1 hover:shadow-md"
+                className="h-full bg-[#FFFBF2] border border-[#951722]/25 rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 md:hover:-translate-y-1 hover:shadow-md"
               >
                 <div>
                   <div className="p-3 pb-0">
@@ -565,17 +571,17 @@ export const HomePage: React.FC = () => {
                       <span aria-hidden="true">·</span>
                       <span>{article.readingTime}</span>
                     </div>
-                    <h3 className="font-display !text-[20px] leading-[1.3] mb-2">
+                    <h3 className="font-display !text-[20px] leading-[1.3] mb-2 min-h-[52px] line-clamp-2">
                       <Link
                         to={`/bai-viet/${article.slug}`}
-                        className="font-display text-[20px] text-[#171815] hover:text-[#951722] transition-colors block leading-[1.3]"
+                        className="font-display text-[20px] text-[#171815] hover:text-[#951722] transition-colors block leading-[1.3] line-clamp-2"
                       >
                         {article.title}
                       </Link>
                     </h3>
                     <p
                       lang="vi"
-                      className="story-justify text-sm text-[#171815]/80 line-clamp-3 leading-relaxed"
+                      className="story-justify text-sm text-[#171815]/80 line-clamp-3 leading-relaxed min-h-[66px]"
                     >
                       {article.excerpt}
                     </p>

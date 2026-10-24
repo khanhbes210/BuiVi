@@ -102,8 +102,11 @@ interface StoreContextValue {
   cartPromotion: PromotionCalculationResult;
   buyNowPromotion: PromotionCalculationResult;
   totalCartItemsCount: number;
+  quickViewProduct: Product | null;
 
   // Actions
+  openQuickView: (product: Product) => void;
+  closeQuickView: () => void;
   addToCart: (
     productId: string,
     quantity?: number,
@@ -314,6 +317,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [flyingItem, setFlyingItem] = useState<FlyingCartItem | null>(null);
   const [cartBadgeBump, setCartBadgeBump] = useState(false);
   const [pdpMobileBarVisible, setPdpMobileBarVisible] = useState(false);
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+
+  const openQuickView = (product: Product) => setQuickViewProduct(product);
+  const closeQuickView = () => setQuickViewProduct(null);
 
   useEffect(() => {
     try {
@@ -839,6 +846,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         cartPromotion,
         buyNowPromotion,
         totalCartItemsCount,
+        quickViewProduct,
+        openQuickView,
+        closeQuickView,
         addToCart,
         startBuyNow,
         updateCartQuantity,

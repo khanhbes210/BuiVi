@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Flame, Ticket } from 'lucide-react';
+import { Flame, Ticket, Eye } from 'lucide-react';
 import { Product, formatPrice, getDiscountPercent, getSavingsAmount } from '../data/products';
 import { useStore } from '../context/StoreContext';
 import { Img } from './Img';
@@ -15,7 +15,7 @@ interface ProductCardProps {
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product, compact = false }) => {
-  const { addToCart, startBuyNow } = useStore();
+  const { addToCart, startBuyNow, openQuickView } = useStore();
   const navigate = useNavigate();
   const { reducedMotion } = useMotionPreferences();
   const discountPercent = getDiscountPercent(product.price, product.oldPrice);
@@ -36,8 +36,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, compact = fal
     navigate('/thanh-toan?mode=buynow');
   };
 
+  const handleOpenQuickView = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    openQuickView(product);
+  };
+
   return (
-    <article className="group relative bg-[#FFFBF2] border border-[#951722]/25 rounded-2xl overflow-hidden flex flex-col justify-between transition-transform duration-300 ease-out md:hover:-translate-y-1 hover:shadow-md">
+    <article
+      data-testid={`product-card-${product.slug}`}
+      className="group relative h-full bg-[#FFFBF2] border border-[#951722]/25 rounded-2xl overflow-hidden flex flex-col justify-between transition-transform duration-300 ease-out md:hover:-translate-y-1 hover:shadow-md"
+    >
       {/* Subtle Đông Hồ Corner Frame SVG that draws on hover */}
       <svg
         aria-hidden="true"
@@ -54,32 +63,31 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, compact = fal
         />
       </svg>
 
-      <div>
+      <div className="flex-1 flex flex-col">
         {/* Image Container */}
-        <Link
-          to={`/san-pham/${product.slug}`}
-          className="block relative aspect-[4/3] overflow-hidden bg-[#F5E6CC]"
-        >
-          <Img
-            src={mainImage.url}
-            alt={mainImage.alt}
-            theme={mainImage.theme}
-            angleIndex={1}
-            className="w-full h-full object-cover transition-transform duration-400 ease-out md:group-hover:scale-105"
-          />
+        <div className="relative aspect-[4/3] overflow-hidden bg-[#F5E6CC]">
+          <Link to={`/san-pham/${product.slug}`} className="block w-full h-full">
+            <Img
+              src={mainImage.url}
+              alt={mainImage.alt}
+              theme={mainImage.theme}
+              angleIndex={1}
+              className="w-full h-full object-cover transition-transform duration-400 ease-out md:group-hover:scale-105"
+            />
 
-          {/* Optional secondary angle crossfade on desktop hover */}
-          {secondaryImage && (
-            <div className="hidden md:block absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-400 pointer-events-none">
-              <Img
-                src={secondaryImage.url}
-                alt={secondaryImage.alt}
-                theme={secondaryImage.theme}
-                angleIndex={2}
-                className="w-full h-full object-cover transition-transform duration-400 ease-out group-hover:scale-105"
-              />
-            </div>
-          )}
+            {/* Optional secondary angle crossfade on desktop hover */}
+            {secondaryImage && (
+              <div className="hidden md:block absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-400 pointer-events-none">
+                <Img
+                  src={secondaryImage.url}
+                  alt={secondaryImage.alt}
+                  theme={secondaryImage.theme}
+                  angleIndex={2}
+                  className="w-full h-full object-cover transition-transform duration-400 ease-out group-hover:scale-105"
+                />
+              </div>
+            )}
+          </Link>
 
           {/* Top-left badge: "Bán chạy" in heritage red (#951722) with cream text */}
           {(product.isBestSeller || product.bestSeller) && (
@@ -91,7 +99,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, compact = fal
                 duration: 0.24,
                 ease: MOTION_TOKENS.easings.emphasized,
               }}
-              className="absolute top-3 left-3 bg-[#951722] text-[#FFF5E4] font-display text-sm px-2.5 py-1 rounded-md shadow-xs inline-flex items-center gap-1 z-10"
+              className="absolute top-3 left-3 bg-[#951722] text-[#FFF5E4] font-display text-sm px-2.5 py-1 rounded-md shadow-xs inline-flex items-center gap-1 z-10 pointer-events-none"
             >
               <Flame className="w-3.5 h-3.5 text-[#F3D27A] shrink-0" />
               <span>Bán chạy</span>
@@ -109,7 +117,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, compact = fal
                 delay: 0.05,
                 ease: MOTION_TOKENS.easings.emphasized,
               }}
-              className="absolute top-3 right-3 bg-[#9B0514] text-[#FFF5E4] font-price text-sm px-2.5 py-1 rounded-md shadow-xs z-10"
+              className="absolute top-3 right-3 bg-[#9B0514] text-[#FFF5E4] font-price text-sm px-2.5 py-1 rounded-md shadow-xs z-10 pointer-events-none"
             >
               -{discountPercent}%
             </motion.span>
@@ -117,62 +125,93 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, compact = fal
 
           {/* Bottom-left promo voucher hint */}
           {product.promoTag && (
-            <span className="absolute bottom-3 left-3 bg-[#1F3D2A]/95 text-[#FFF5E4] text-xs font-semibold px-2.5 py-1 rounded-md shadow-xs inline-flex items-center gap-1 z-10">
+            <span className="absolute bottom-3 left-3 bg-[#1F3D2A]/95 text-[#FFF5E4] text-xs font-semibold px-2.5 py-1 rounded-md shadow-xs inline-flex items-center gap-1 z-10 pointer-events-none">
               <Ticket className="w-3 h-3 text-[#F3D27A] shrink-0" />
               <span>{product.promoTag}</span>
             </span>
           )}
-        </Link>
 
-        {/* Content */}
-        <div className="p-5">
-          {/* Clean metadata */}
-          <div className="flex items-center gap-2 text-xs text-[#1F3D2A] font-semibold mb-1.5">
-            <span>{product.category}</span>
-            <span aria-hidden="true">·</span>
-            <span className="truncate">{product.packSpec}</span>
+          {/* Quick-View Hover Button ("Xem nhanh") */}
+          <button
+            type="button"
+            data-testid={`quick-view-btn-${product.slug}`}
+            onClick={handleOpenQuickView}
+            aria-label={`Xem nhanh ${product.name}`}
+            className="absolute bottom-3 right-3 z-20 px-3 py-1.5 rounded-xl bg-[#FFFBF2]/95 hover:bg-[#951722] text-[#171815] hover:text-[#FFF5E4] border border-[#951722]/35 shadow-md text-xs font-bold inline-flex items-center gap-1.5 opacity-95 md:opacity-0 md:translate-y-1 md:group-hover:opacity-100 md:group-hover:translate-y-0 focus:opacity-100 transition-all duration-200 cursor-pointer"
+          >
+            <Eye className="w-3.5 h-3.5 text-[#951722] group-hover:text-current shrink-0" />
+            <span>Xem nhanh</span>
+          </button>
+        </div>
+
+        {/* Content with locked row heights for uniform card alignment */}
+        <div className="p-5 flex-1 flex flex-col justify-between">
+          <div>
+            {/* Clean metadata */}
+            <div className="flex items-center gap-2 text-xs text-[#1F3D2A] font-semibold mb-1.5 min-h-[20px]">
+              <span className="shrink-0">{product.category}</span>
+              <span aria-hidden="true">·</span>
+              <span className="truncate">{product.packSpec}</span>
+            </div>
+
+            {/* Locked 2-line title height */}
+            <h3 className="font-display !text-[20px] leading-[1.3] mb-2 min-h-[52px] line-clamp-2">
+              <Link
+                to={`/san-pham/${product.slug}`}
+                className="font-display text-[20px] text-[#171815] group-hover:text-[#951722] transition-colors block leading-[1.3] line-clamp-2"
+              >
+                {product.name}
+              </Link>
+            </h3>
+
+            {!compact && (
+              <p className="text-sm text-[#171815]/80 line-clamp-2 mb-4 leading-relaxed min-h-[44px]">
+                {product.shortDesc}
+              </p>
+            )}
           </div>
 
-          <h3 className="font-display !text-[20px] leading-[1.3] mb-2">
-            <Link
-              to={`/san-pham/${product.slug}`}
-              className="font-display text-[20px] text-[#171815] group-hover:text-[#951722] transition-colors block leading-[1.3]"
-            >
-              {product.name}
-            </Link>
-          </h3>
-
-          {!compact && (
-            <p className="text-sm text-[#171815]/80 line-clamp-2 mb-4 leading-relaxed">
-              {product.shortDesc}
-            </p>
-          )}
-
-          {/* Price Block */}
-          <div className="flex items-baseline flex-wrap gap-2 pt-2 border-t border-[#951722]/15">
-            <span className="font-price text-[22px] text-[#9B0514]">
-              {formatPrice(product.price)}
-            </span>
-            {product.oldPrice && product.oldPrice > product.price && (
-              <>
-                <span className="font-price text-sm text-[#171815]/50 line-through">
-                  {formatPrice(product.oldPrice)}
-                </span>
-                {savingsAmount > 0 && (
-                  <span className="font-price text-xs text-[#9B0514] bg-[#9B0514]/10 px-2 py-0.5 rounded">
-                    Tiết kiệm {formatPrice(savingsAmount)}
+          {/* Price Block with locked height so cards with/without oldPrice align */}
+          <div className="pt-2.5 border-t border-[#951722]/15 min-h-[56px] flex flex-col justify-center">
+            <div className="flex items-baseline flex-wrap gap-2">
+              <span className="font-price text-[22px] text-[#9B0514] leading-tight">
+                {formatPrice(product.price)}
+              </span>
+              {product.oldPrice && product.oldPrice > product.price ? (
+                <>
+                  <span className="font-price text-sm text-[#171815]/50 line-through">
+                    {formatPrice(product.oldPrice)}
                   </span>
-                )}
-              </>
-            )}
+                  {savingsAmount > 0 && (
+                    <span className="font-price text-xs text-[#9B0514] bg-[#9B0514]/10 px-2 py-0.5 rounded">
+                      Tiết kiệm {formatPrice(savingsAmount)}
+                    </span>
+                  )}
+                </>
+              ) : (
+                <span className="text-xs font-semibold text-[#1F3D2A]/75">
+                  Giá niêm yết chuẩn làng nghề
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Two mandatory conversion CTAs using shared <AddToCartButton/> & <BuyNowButton/> */}
-      <div className="px-5 pb-5 pt-1 flex flex-wrap gap-2.5">
-        <AddToCartButton product={product} onClick={handleAddToCart} className="flex-1" />
-        <BuyNowButton product={product} onClick={handleBuyNow} className="flex-1" />
+      {/* Two mandatory conversion CTAs locked on a single row */}
+      <div className="px-5 pb-5 pt-1 grid grid-cols-2 gap-2.5 w-full">
+        <AddToCartButton
+          product={product}
+          size="sm"
+          onClick={handleAddToCart}
+          className="w-full !min-w-0 !min-h-[48px] !px-2.5 sm:!px-3.5 !text-[14px] sm:!text-[15px]"
+        />
+        <BuyNowButton
+          product={product}
+          size="sm"
+          onClick={handleBuyNow}
+          className="w-full !min-w-0 !min-h-[48px] !px-2.5 sm:!px-3.5 !text-[14px] sm:!text-[15px]"
+        />
       </div>
     </article>
   );

@@ -335,12 +335,12 @@ export const ArticleListPage: React.FC = () => {
 
             {/* Remaining Articles in a 2–3 Column Grid */}
             {gridArticles.length > 0 && (
-              <Stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
+              <Stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7 items-stretch">
                 {gridArticles.map((article) => (
                   <article
                     key={article.id}
                     data-testid="grid-article-card"
-                    className="bg-[#FFFBF2] border border-[#951722]/25 rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 md:hover:-translate-y-1 hover:shadow-md"
+                    className="h-full bg-[#FFFBF2] border border-[#951722]/25 rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 md:hover:-translate-y-1 hover:shadow-md"
                   >
                     <div>
                       <div className="p-3 pb-0">
@@ -363,13 +363,13 @@ export const ArticleListPage: React.FC = () => {
                         </div>
                         <Link
                           to={`/bai-viet/${article.slug}`}
-                          className="font-display text-[20px] text-[#171815] hover:text-[#951722] block leading-[1.35]"
+                          className="font-display text-[20px] text-[#171815] hover:text-[#951722] block leading-[1.35] min-h-[54px] line-clamp-2"
                         >
                           {article.title}
                         </Link>
                         <p
                           lang="vi"
-                          className="story-justify text-base text-[#171815]/80 line-clamp-3 leading-[1.75]"
+                          className="story-justify text-base text-[#171815]/80 line-clamp-3 leading-[1.75] min-h-[84px]"
                         >
                           {article.excerpt}
                         </p>
