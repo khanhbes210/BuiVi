@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import {
@@ -6,74 +6,87 @@ import {
   CheckCircle2,
   AlertCircle,
   Sparkles,
+  X,
   Gift,
   Truck,
-  X,
   RefreshCw,
+  ChevronDown,
 } from 'lucide-react';
-import {
-  PromotionCalculationResult,
-  validateManualVoucherCode,
-  getVoucherSelectToast,
-} from '../utils/promotionEngine';
-import { formatPrice } from '../data/products';
+import { PromotionCalculationResult, validateManualVoucherCode } from '../utils/promotionEngine';
+import { formatCurrency, formatPrice } from '../data/products';
 import { useStore } from '../context/StoreContext';
 import {
   AnimatedPrice,
-  AnimationSlot,
   MOTION_TOKENS,
   useMotionPreferences,
 } from '../motion';
 
 export interface VoucherBoxProps {
   promotion: PromotionCalculationResult;
-  allowedCodes?: string[];
-  onSelectVoucherCode?: (code: string | null) => void;
-  ineligibleWarning?: string | null;
-  showPriceBreakdown?: boolean;
   compact?: boolean;
+  /**
+   * Optional override when used in BuyNow mode where voucher state is local or shared
+   */
+  onSelectVoucherCode?: (code: string) => void;
+}
+
+/**
+ * Formats the exact required toast copy when switching vouchers (P1-5):
+ * "Đã đổi sang mã QUATET15 (giảm 153.000đ) thay cho BUIVI10 (giảm 102.000đ)"
+ */
+export function getVoucherSelectToast(
+  prevCode: string | null,
+  prevDiscount: number,
+  nextCode: string,
+  nextDiscount: number
+): string {
+  if (prevCode && prevCode !== nextCode && prevDiscount > 0) {
+    return `Đã đổi sang mã ${nextCode} (giảm ${formatPrice(
+      nextDiscount
+    )}) thay cho ${prevCode} (giảm ${formatPrice(prevDiscount)})`;
+  }
+  return `Đã áp dụng mã ${nextCode} – giảm ${formatPrice(nextDiscount)} cho đơn này`;
 }
 
 export const VoucherBox: React.FC<VoucherBoxProps> = ({
   promotion,
-  allowedCodes,
-  onSelectVoucherCode,
-  ineligibleWarning,
-  showPriceBreakdown = true,
   compact = false,
+  onSelectVoucherCode,
 }) => {
-  const { applyVoucherCode, removeAppliedVoucher, showToast } = useStore();
-  const { reducedMotion } = useMotionPreferences();
+  const {
+    applyVoucherCode,
+    removeAppliedVoucher,
+    ineligibleWarning,
+    showToast,
+  } = useStore();
   const [inputCode, setInputCode] = useState('');
   const [feedback, setFeedback] = useState<{ ok: boolean; text: string } | null>(null);
+  // Collapsed by default so the right-hand Cart/Checkout column stays compact; expands when clicking "Chọn mã ưu đãi" or "Đổi mã"
+  const [listExpanded, setListExpanded] = useState(false);
   const [shakeInput, setShakeInput] = useState(false);
-  const [listExpanded, setListExpanded] = useState(true);
-  const listRef = useRef<HTMLDivElement>(null);
+  const [savingsPulse, setSavingsPulse] = useState(false);
+  const listRef = useRef<HTMLDivElement | null>(null);
+  const prevSavingsRef = useRef(promotion.totalSavings);
+  const { reducedMotion } = useMotionPreferences();
 
-  const visibleStatuses = allowedCodes
-    ? promotion.voucherStatuses.filter((s) => allowedCodes.includes(s.voucher.code))
-    : promotion.voucherStatuses;
-
-  const bestCode = promotion.bestEligibleDiscountVoucher?.voucher.code || null;
-
-  const getShortCondition = (code: string, minOrder: number, maxDiscount: number): string => {
-    switch (code) {
-      case 'BUIVI10':
-        return `Đơn từ ${formatPrice(minOrder)}, tối đa ${formatPrice(maxDiscount)} (trừ Combo 3 hộp quà)`;
-      case 'QUATET15':
-        return `Áp dụng Set Vinh Hoa - Phú Quý & Set Độc Bản, tối đa ${formatPrice(maxDiscount)}`;
-      case 'FREESHIP':
-        return `Đơn từ ${formatPrice(minOrder)}, hỗ trợ tối đa ${formatPrice(maxDiscount)}`;
-      case 'COMBO3':
-        return 'Mua Combo 3 hộp quà giảm thêm 50.000đ + tặng túi Điệp & thiệp viết tay';
-      case 'THANHVIEN50':
-        return `Đơn đầu tiên thành viên mới từ ${formatPrice(minOrder)}, giảm ${formatPrice(maxDiscount)}`;
-      case 'TANGHOP':
-        return 'Mua từ 2 Set quà bất kỳ tặng 1 hộp Nem chua (trị giá 85.000đ)';
-      default:
-        return `Đơn từ ${formatPrice(minOrder)}, tối đa ${formatPrice(maxDiscount)}`;
+  useEffect(() => {
+    if (promotion.totalSavings !== prevSavingsRef.current && promotion.totalSavings > 0) {
+      setSavingsPulse(true);
+      const t = setTimeout(() => setSavingsPulse(false), 320);
+      prevSavingsRef.current = promotion.totalSavings;
+      return () => clearTimeout(t);
     }
-  };
+    prevSavingsRef.current = promotion.totalSavings;
+  }, [promotion.totalSavings]);
+
+  const visibleStatuses = promotion.voucherStatuses;
+  const eligibleCount = visibleStatuses.filter((v) => v.eligible).length;
+
+  // Identify the single best eligible discount voucher to badge as "Mã tốt nhất"
+  const bestEligibleStatus = visibleStatuses
+    .filter((s) => s.eligible && s.estimatedDiscount > 0)
+    .sort((a, b) => b.estimatedDiscount - a.estimatedDiscount)[0];
+  const bestCode = bestEligibleStatus?.voucher.code || null;
 
   const triggerShake = () => {
     setShakeInput(false);
@@ -83,7 +96,7 @@ export const VoucherBox: React.FC<VoucherBoxProps> = ({
     });
   };
 
-  const handleApplyVoucherCard = (code: string) => {
+  const handleApplyVoucherCard = (code: string, closeDrawerAfter = false) => {
     const targetStatus = promotion.voucherStatuses.find((s) => s.voucher.code === code);
     if (!targetStatus || !targetStatus.eligible) return;
 
@@ -93,6 +106,7 @@ export const VoucherBox: React.FC<VoucherBoxProps> = ({
       )}) cho đơn này`;
       setFeedback({ ok: true, text: msg });
       showToast(msg);
+      if (closeDrawerAfter) setListExpanded(false);
       return;
     }
 
@@ -100,6 +114,7 @@ export const VoucherBox: React.FC<VoucherBoxProps> = ({
       const msg = 'Đã áp dụng mã TANGHOP – tặng 1 hộp Nem chua (trị giá 85.000đ) cho đơn này';
       setFeedback({ ok: true, text: msg });
       showToast(msg);
+      if (closeDrawerAfter) setListExpanded(false);
       return;
     }
 
@@ -112,10 +127,15 @@ export const VoucherBox: React.FC<VoucherBoxProps> = ({
       onSelectVoucherCode(code);
       setFeedback({ ok: true, text: toastMsg });
       showToast(toastMsg);
+      if (closeDrawerAfter) setListExpanded(false);
     } else {
       const res = applyVoucherCode(code, promotion);
       setFeedback({ ok: res.ok, text: res.message });
-      if (!res.ok) triggerShake();
+      if (!res.ok) {
+        triggerShake();
+      } else if (closeDrawerAfter) {
+        setListExpanded(false);
+      }
     }
   };
 
@@ -140,12 +160,12 @@ export const VoucherBox: React.FC<VoucherBoxProps> = ({
       triggerShake();
       return;
     }
-    handleApplyVoucherCard(check.voucher.code);
+    handleApplyVoucherCard(check.voucher.code, true);
     setInputCode('');
   };
 
   const handleFocusSwitchList = () => {
-    setListExpanded(true);
+    setListExpanded((prev) => !prev);
     if (listRef.current) {
       listRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
@@ -193,7 +213,7 @@ export const VoucherBox: React.FC<VoucherBoxProps> = ({
                 className="px-2.5 py-1 rounded-lg bg-[#FFF5E4]/15 hover:bg-[#FFF5E4]/25 text-[#F3D27A] inline-flex items-center gap-1 cursor-pointer transition-colors"
               >
                 <RefreshCw className="w-3 h-3" />
-                <span>Đổi mã</span>
+                <span>{listExpanded ? 'Thu gọn' : 'Đổi mã'}</span>
               </button>
               <button
                 type="button"
@@ -219,7 +239,7 @@ export const VoucherBox: React.FC<VoucherBoxProps> = ({
         </div>
       )}
 
-      {/* Selectable Radio-Style Voucher Cards */}
+      {/* Compact Voucher Input & Collapsible Selector Drawer */}
       <div
         ref={listRef}
         className="bg-[#FFF5E4] border border-[#951722]/25 rounded-2xl p-3.5 sm:p-4 space-y-3"
@@ -227,10 +247,7 @@ export const VoucherBox: React.FC<VoucherBoxProps> = ({
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#1F3D2A]">
             <Ticket className="w-4 h-4 text-[#951722]" />
-            <span>
-              Chọn mã ưu đãi ({visibleStatuses.filter((v) => v.eligible).length}/
-              {visibleStatuses.length} đủ điều kiện)
-            </span>
+            <span>Mã ưu đãi & Khuyến mãi</span>
           </div>
           <Link
             to="/khuyen-mai"
@@ -290,272 +307,295 @@ export const VoucherBox: React.FC<VoucherBoxProps> = ({
           )}
         </AnimatePresence>
 
-        {/* Radio-style Voucher Cards List */}
-        {listExpanded && (
-          <div
-            role="radiogroup"
-            aria-label="Danh sách mã giảm giá"
-            className={`space-y-2.5 ${compact ? 'max-h-64 overflow-y-auto pr-1' : ''}`}
-          >
-            {visibleStatuses.map((status) => {
-              const { voucher, eligible, estimatedDiscount, reasonIfIneligible } = status;
-              const isDiscountVoucher = ['BUIVI10', 'QUATET15', 'COMBO3', 'THANHVIEN50'].includes(
-                voucher.code
-              );
-              const isSelected = isDiscountVoucher
-                ? promotion.appliedDiscountCode === voucher.code
-                : (voucher.code === 'FREESHIP' && promotion.freeshipApplied) ||
-                  (voucher.code === 'TANGHOP' && promotion.tangHopGiftActive);
-              const isBest = bestCode === voucher.code && eligible;
+        {/* Toggle Button to Expand / Collapse Available Vouchers */}
+        <button
+          type="button"
+          data-testid="toggle-voucher-list-btn"
+          aria-expanded={listExpanded}
+          onClick={() => setListExpanded((prev) => !prev)}
+          className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl bg-[#FFFBF2] hover:bg-[#F5E6CC]/65 border border-[#951722]/30 flex items-center justify-between gap-2 text-xs sm:text-sm font-semibold text-[#171815] transition-colors cursor-pointer"
+        >
+          <div className="flex flex-wrap items-center gap-2 min-w-0 text-left">
+            <span className="text-[#1F3D2A]">
+              {listExpanded
+                ? 'Thu gọn danh sách mã ưu đãi'
+                : `Chọn mã ưu đãi có sẵn (${eligibleCount}/${visibleStatuses.length} đủ điều kiện)`}
+            </span>
+            {!listExpanded && bestCode && (
+              <span className="badge-micro inline-flex items-center gap-1 bg-[#951722]/10 text-[#951722] border border-[#951722]/25 px-2 py-0.5 rounded-md">
+                <Sparkles className="w-3 h-3 text-[#951722]" />
+                <span>Gợi ý: {bestCode}</span>
+              </span>
+            )}
+          </div>
+          <ChevronDown
+            className={`w-4 h-4 text-[#951722] shrink-0 transition-transform duration-200 ${
+              listExpanded ? 'rotate-180' : ''
+            }`}
+          />
+        </button>
 
-              return (
-                <div
-                  key={voucher.code}
-                  data-testid={`voucher-card-${voucher.code}`}
-                  onClick={() => {
-                    if (eligible && !isSelected) {
-                      handleApplyVoucherCard(voucher.code);
-                    }
-                  }}
-                  className={`p-3 rounded-xl border-2 transition-all duration-200 ${
-                    eligible
-                      ? isSelected
-                        ? 'bg-[#1F3D2A]/10 border-[#1F3D2A] shadow-xs cursor-default'
-                        : 'bg-[#FFFBF2] border-[#951722]/25 hover:border-[#951722] cursor-pointer'
-                      : 'bg-[#F5E6CC]/45 border-[#171815]/15 opacity-75 cursor-not-allowed'
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-start gap-2.5 min-w-0">
-                      {/* Radio / Check indicator */}
-                      <div
-                        className={`mt-0.5 w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
-                          isSelected
-                            ? 'border-[#1F3D2A] bg-[#1F3D2A] text-[#FFF5E4]'
-                            : eligible
-                            ? 'border-[#951722]'
-                            : 'border-[#171815]/30'
-                        }`}
-                      >
-                        {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-[#FFF5E4]" />}
-                      </div>
+        {/* Collapsible Radio-style Voucher Cards List */}
+        <AnimatePresence initial={false}>
+          {listExpanded && (
+            <motion.div
+              key="voucher-radio-list"
+              initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
+              transition={{
+                duration: MOTION_TOKENS.durations.fast,
+                ease: MOTION_TOKENS.easings.standard,
+              }}
+              role="radiogroup"
+              aria-label="Danh sách mã giảm giá"
+              className={`space-y-2.5 pt-1 ${
+                compact ? 'max-h-60' : 'max-h-[310px]'
+              } overflow-y-auto pr-1`}
+            >
+              {visibleStatuses.map((status) => {
+                const { voucher, eligible, estimatedDiscount, reasonIfIneligible } = status;
+                const isDiscountVoucher = ['BUIVI10', 'QUATET15', 'COMBO3', 'THANHVIEN50'].includes(
+                  voucher.code
+                );
+                const isSelected = isDiscountVoucher
+                  ? promotion.appliedDiscountCode === voucher.code
+                  : (voucher.code === 'FREESHIP' && promotion.freeshipApplied) ||
+                    (voucher.code === 'TANGHOP' && promotion.tangHopGiftActive);
+                const isBest = bestCode === voucher.code && eligible;
 
-                      <div className="min-w-0 space-y-1">
-                        <div className="flex flex-wrap items-center gap-1.5">
-                          <span
-                            className={`font-display text-xs px-2 py-0.5 rounded ${
-                              eligible
-                                ? 'bg-[#1F3D2A] text-[#FFF5E4]'
-                                : 'bg-[#171815]/20 text-[#171815]/70'
-                            }`}
-                          >
-                            {voucher.code}
-                          </span>
-                          <span className="font-price text-sm text-[#9B0514]">
-                            {voucher.valueText}
-                          </span>
-                          {isBest && (
-                            <span className="inline-flex items-center gap-1 bg-[#951722] text-[#FFF5E4] text-[10px] font-bold px-2 py-0.5 rounded-full">
-                              <Sparkles className="w-2.5 h-2.5 text-[#F3D27A]" />
-                              <span>Mã tốt nhất</span>
-                            </span>
-                          )}
+                return (
+                  <div
+                    key={voucher.code}
+                    data-testid={`voucher-card-${voucher.code}`}
+                    onClick={() => {
+                      if (eligible && !isSelected) {
+                        handleApplyVoucherCard(voucher.code, true);
+                      }
+                    }}
+                    className={`p-3 rounded-xl border-2 transition-all duration-200 ${
+                      eligible
+                        ? isSelected
+                          ? 'bg-[#1F3D2A]/10 border-[#1F3D2A] shadow-xs cursor-default'
+                          : 'bg-[#FFFBF2] border-[#951722]/25 hover:border-[#951722] cursor-pointer'
+                        : 'bg-[#F5E6CC]/45 border-[#171815]/15 opacity-75 cursor-not-allowed'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-start gap-2.5 min-w-0">
+                        {/* Radio / Check indicator */}
+                        <div
+                          className={`mt-0.5 w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
+                            isSelected
+                              ? 'border-[#1F3D2A] bg-[#1F3D2A] text-[#FFF5E4]'
+                              : eligible
+                              ? 'border-[#951722]'
+                              : 'border-[#171815]/30'
+                          }`}
+                        >
+                          {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-[#FFF5E4]" />}
                         </div>
 
-                        {/* Short condition */}
-                        <p className="text-[11px] text-[#171815]/80 leading-snug">
-                          {getShortCondition(voucher.code, voucher.minOrder, voucher.maxDiscount)}
-                        </p>
-
-                        {/* Eligibility state */}
-                        {eligible ? (
-                          <p className="text-[11px] font-bold text-[#1F3D2A] flex items-center gap-1">
-                            <CheckCircle2 className="w-3 h-3 shrink-0" />
-                            <span>
-                              Đủ điều kiện
-                              {estimatedDiscount > 0 && voucher.type !== 'gift'
-                                ? ` (Tiết kiệm ${formatPrice(estimatedDiscount)})`
-                                : ''}
+                        <div className="min-w-0 space-y-1">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <span
+                              className={`font-display text-xs px-2 py-0.5 rounded ${
+                                eligible
+                                  ? 'bg-[#1F3D2A] text-[#FFF5E4]'
+                                  : 'bg-[#171815]/20 text-[#171815]/70'
+                              }`}
+                            >
+                              {voucher.code}
                             </span>
-                          </p>
-                        ) : (
-                          <p className="text-[11px] font-semibold text-[#171815]/60">
-                            {reasonIfIneligible || 'Chưa đủ điều kiện'}
-                          </p>
-                        )}
-                      </div>
-                    </div>
+                            <span className="font-price text-sm text-[#9B0514]">
+                              {voucher.valueText}
+                            </span>
+                            {isBest && (
+                              <span className="inline-flex items-center gap-1 bg-[#951722] text-[#FFF5E4] text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                <Sparkles className="w-2.5 h-2.5 text-[#F3D27A]" />
+                                <span>Mã tốt nhất</span>
+                              </span>
+                            )}
+                          </div>
 
-                    {/* Action Button on Right */}
-                    <div className="shrink-0">
-                      {eligible ? (
-                        isSelected ? (
-                          <motion.span
-                            initial={reducedMotion ? false : { scale: 0.9 }}
-                            animate={{ scale: 1 }}
-                            transition={{ duration: 0.2 }}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#1F3D2A] text-[#FFF5E4] text-[11px] font-bold"
-                          >
-                            <CheckCircle2 className="w-3.5 h-3.5 text-[#F3D27A]" />
-                            <span>Đang áp dụng</span>
-                          </motion.span>
-                        ) : (
+                          <p className="text-xs text-[#171815]/80">
+                            Đơn tối thiểu:{' '}
+                            <strong className="font-price">
+                              {voucher.minOrder > 0 ? formatPrice(voucher.minOrder) : '0đ'}
+                            </strong>{' '}
+                            · Tối đa:{' '}
+                            <strong className="font-price">{formatPrice(voucher.maxDiscount)}</strong>
+                          </p>
+
+                          {eligible ? (
+                            <p className="text-xs font-semibold text-[#1F3D2A]">
+                              ✓ Đủ điều kiện · Tiết kiệm{' '}
+                              <span className="font-price">{formatPrice(estimatedDiscount)}</span>
+                            </p>
+                          ) : (
+                            <p className="text-xs font-semibold text-[#9B0514]">
+                              ✕ Chưa đủ điều kiện: {reasonIfIneligible}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="shrink-0">
+                        {eligible ? (
                           <button
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleApplyVoucherCard(voucher.code);
+                              if (!isSelected) handleApplyVoucherCard(voucher.code, true);
                             }}
-                            className="px-3 py-1.5 rounded-lg bg-[#951722] hover:bg-[#9B0514] active:scale-95 text-[#FFF5E4] font-bold text-xs cursor-pointer transition-all"
+                            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                              isSelected
+                                ? 'bg-[#1F3D2A] text-[#FFF5E4]'
+                                : 'bg-[#951722] hover:bg-[#9B0514] text-[#FFF5E4]'
+                            }`}
                           >
-                            Áp dụng
+                            {isSelected ? 'Đang dùng' : 'Dùng mã'}
                           </button>
-                        )
-                      ) : (
-                        <button
-                          type="button"
-                          disabled
-                          className="px-2.5 py-1 rounded-lg bg-[#171815]/10 text-[#171815]/45 font-bold text-[11px] cursor-not-allowed"
-                        >
-                          Chưa đủ ĐK
-                        </button>
-                      )}
+                        ) : (
+                          <span className="inline-block px-2 py-1 rounded bg-[#171815]/10 text-[#171815]/55 text-[11px] font-semibold">
+                            Chưa thỏa
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Voucher Celebration Animation Holder when a discount voucher is active */}
-        {promotion.appliedDiscountVoucher && promotion.voucherDiscountAmount > 0 && (
-          <div className="pt-1 flex items-center justify-between gap-3 bg-[#FFFBF2] border border-[#951722]/20 rounded-xl p-2.5">
-            <AnimationSlot
-              id="promo-voucher-celebrate"
-              compact
-              className="w-12 h-12 shrink-0 !p-1"
-            />
-            <div className="text-xs text-[#1F3D2A] flex-1">
-              <p className="font-display text-sm text-[#951722]">
-                Ưu đãi {promotion.appliedDiscountCode} đã kích hoạt!
-              </p>
-              <p className="text-[11px] text-[#171815]/75">
-                Đơn hàng được giảm trực tiếp{' '}
-                <span className="font-price text-[#9B0514]">
-                  {formatPrice(promotion.voucherDiscountAmount)}
-                </span>
-              </p>
-            </div>
-          </div>
-        )}
+                );
+              })}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Gifts Breakdown (TANGHOP / COMBO3) */}
-      {showPriceBreakdown && promotion.gifts.length > 0 && (
-        <div className="bg-[#FFF5E4] border border-[#1F3D2A]/30 rounded-xl p-3 space-y-1.5">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-[#1F3D2A]">
-            <Gift className="w-4 h-4 text-[#951722]" />
-            <span>Quà tặng kèm tự động:</span>
-          </div>
-          {promotion.gifts.map((g) => (
-            <div
-              key={g.code}
-              className="flex items-center justify-between text-xs bg-[#FFFBF2] px-2.5 py-2 rounded-lg border border-[#951722]/15"
-            >
-              <span className="font-semibold text-[#171815]">{g.name}</span>
-              <span className="font-price text-[#1F3D2A] bg-[#1F3D2A]/10 px-2 py-0.5 rounded whitespace-nowrap">
-                {g.badgeText}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
+      {/* Detailed Transparent Price Calculation Breakdown */}
+      <div className="bg-[#FFFBF2] border-2 border-[#951722]/30 rounded-2xl p-4 sm:p-5 space-y-3">
+        <h4 className="font-display text-lg text-[#951722] border-b border-[#951722]/15 pb-2">
+          Chi Tiết Tính Giá & Khuyến Mãi
+        </h4>
 
-      {/* Animated Itemized Price Breakdown (Section B3.3) */}
-      {showPriceBreakdown && (
-        <div
-          data-testid="voucher-price-breakdown"
-          className="bg-[#FFFBF2] border-2 border-[#951722]/25 rounded-2xl p-4 space-y-2.5 text-sm transition-all duration-300"
-        >
-          {promotion.oldSubtotal > promotion.subtotal && (
-            <div className="flex justify-between items-center text-xs text-[#171815]/65">
-              <span>Giá gốc:</span>
-              <span className="font-price line-through">
-                {formatPrice(promotion.oldSubtotal)}
-              </span>
-            </div>
-          )}
-
-          <div className="flex justify-between items-center">
-            <span className="text-[#171815]/85">Giá niêm yết:</span>
+        <div className="space-y-2 text-sm">
+          {/* 1. Original Price */}
+          <div className="flex justify-between items-center text-[#171815]/75">
+            <span className="font-display">Giá gốc niêm yết:</span>
             <AnimatedPrice
-              value={promotion.subtotal}
-              className="font-price text-[20px] text-[#171815]"
+              value={promotion.oldSubtotal}
+              className="font-price line-through"
             />
           </div>
 
-          {promotion.appliedDiscountCode && promotion.voucherDiscountAmount > 0 && (
-            <div className="flex justify-between items-center text-[#9B0514]">
-              <span>
-                Voucher <span className="font-display">{promotion.appliedDiscountCode}</span>:
-              </span>
-              <span className="font-price text-[20px]">
-                −{formatPrice(promotion.voucherDiscountAmount)}
+          {/* 2. Product sale / Combo discount */}
+          {promotion.directSaleSavings > 0 && (
+            <div className="flex justify-between items-center text-[#1F3D2A]">
+              <span>Tiết kiệm giá ưu đãi / Combo Set:</span>
+              <span className="font-price font-semibold">
+                -<AnimatedPrice value={promotion.directSaleSavings} />
               </span>
             </div>
           )}
 
-          <div className="flex justify-between items-center">
-            <span className="text-[#171815]/85 flex items-center gap-1.5">
-              <Truck className="w-4 h-4 text-[#1F3D2A]" />
-              <span>Phí vận chuyển:</span>
-            </span>
-            <div className="text-right">
-              {promotion.freeshipApplied ? (
-                <div className="flex items-center gap-1.5">
-                  <span className="font-price text-xs text-[#171815]/50 line-through">
-                    {formatPrice(promotion.shippingFeeBeforeDiscount)}
-                  </span>
-                  <span className="font-price text-[#1F3D2A]">Miễn phí</span>
-                </div>
-              ) : (
-                <span className="font-price text-[#171815]">
-                  {formatPrice(promotion.finalShippingFee)}
-                </span>
-              )}
-            </div>
+          {/* 3. Subtotal before voucher */}
+          <div className="flex justify-between items-center font-medium text-[#171815] pt-1 border-t border-dashed border-[#951722]/15">
+            <span className="font-display">Tạm tính (giá đang bán):</span>
+            <AnimatedPrice value={promotion.subtotal} className="font-price font-semibold" />
           </div>
 
-          <div className="pt-2.5 border-t border-[#951722]/20 flex justify-between items-baseline">
-            <span className="font-display text-base text-[#171815]">Tạm tính sau ưu đãi:</span>
+          {/* 4. Voucher Discount */}
+          {promotion.voucherDiscountAmount > 0 && promotion.appliedDiscountCode && (
+            <div className="flex justify-between items-center text-[#9B0514] bg-[#9B0514]/5 px-2.5 py-1.5 rounded-lg">
+              <span className="flex items-center gap-1.5 font-semibold">
+                <Ticket className="w-4 h-4 shrink-0" />
+                <span>
+                  Voucher <span className="font-display">{promotion.appliedDiscountCode}</span>:
+                </span>
+              </span>
+              <span className="font-price font-bold">
+                -<AnimatedPrice value={promotion.voucherDiscountAmount} />
+              </span>
+            </div>
+          )}
+
+          {/* 5. Subtotal after discount */}
+          {promotion.voucherDiscountAmount > 0 && (
+            <div className="flex justify-between items-center text-[#171815]/85">
+              <span>Tạm tính sau giảm mã:</span>
+              <AnimatedPrice
+                value={subtotalAfterDiscount}
+                className="font-price font-semibold"
+              />
+            </div>
+          )}
+
+          {/* 6. Shipping Fee & FREESHIP */}
+          <div className="flex justify-between items-center text-[#171815]/85">
+            <span className="flex items-center gap-1.5">
+              <Truck className="w-4 h-4 text-[#1F3D2A]" />
+              <span>Phí vận chuyển tiêu chuẩn:</span>
+            </span>
+            {promotion.subtotal === 0 ? (
+              <span className="font-price">0đ</span>
+            ) : promotion.freeshipApplied ? (
+              <span className="font-price">
+                <span className="line-through text-[#171815]/50 mr-1.5">
+                  {formatCurrency(promotion.shippingFeeBeforeDiscount)}
+                </span>
+                <strong className="text-[#1F3D2A]">0đ (FREESHIP)</strong>
+              </span>
+            ) : (
+              <AnimatedPrice value={promotion.finalShippingFee} className="font-price" />
+            )}
+          </div>
+
+          {/* 7. Free Gifts Line (0đ - Quà tặng) */}
+          {promotion.gifts.length > 0 && (
+            <div className="pt-2 border-t border-dashed border-[#951722]/15 space-y-1.5">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#1F3D2A] flex items-center gap-1">
+                <Gift className="w-3.5 h-3.5 text-[#951722]" />
+                <span>Quà tặng kèm trong đơn (0đ):</span>
+              </span>
+              {promotion.gifts.map((g) => (
+                <div
+                  key={g.code}
+                  className="flex justify-between items-start gap-2 text-xs bg-[#1F3D2A]/10 text-[#1F3D2A] px-2.5 py-1.5 rounded-lg"
+                >
+                  <span className="font-display">{g.name}</span>
+                  <span className="font-price whitespace-nowrap shrink-0">{g.badgeText}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* 8. Final Total */}
+          <div className="pt-3 border-t-2 border-[#951722]/30 flex justify-between items-baseline">
+            <span className="font-display text-base text-[#171815]">Tổng thanh toán:</span>
             <AnimatedPrice
-              value={subtotalAfterDiscount}
-              testId="subtotal-after-discount"
-              showOldStrike
+              value={promotion.finalTotal}
               className="font-price text-2xl text-[#9B0514]"
             />
           </div>
 
-          <div className="flex justify-between items-baseline text-xs text-[#171815]/85">
-            <span className="font-display">Tổng thanh toán (gồm phí vận chuyển):</span>
-            <AnimatedPrice
-              value={promotion.finalTotal}
-              showOldStrike
-              className="font-price text-[20px] text-[#171815]"
-            />
-          </div>
-
+          {/* 9. Total Savings Highlight */}
           {promotion.totalSavings > 0 && (
-            <div className="bg-[#951722]/10 border border-[#951722]/30 rounded-xl py-2 px-3 text-center">
-              <span className="font-display text-xs sm:text-sm text-[#9B0514]">
-                Bạn đã tiết kiệm{' '}
-                <span className="font-price underline">{formatPrice(promotion.totalSavings)}</span>
+            <motion.div
+              animate={savingsPulse && !reducedMotion ? { scale: [1, 1.03, 1] } : { scale: 1 }}
+              transition={{ duration: 0.3 }}
+              className="bg-[#1F3D2A] text-[#FFF5E4] px-3 py-2 rounded-xl flex items-center justify-between text-xs"
+            >
+              <span className="flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-[#F3D27A] shrink-0" />
+                <span className="font-display text-sm">Bạn đã tiết kiệm tổng cộng:</span>
               </span>
-            </div>
+              <AnimatedPrice
+                value={promotion.totalSavings}
+                className="font-price text-[#F3D27A] text-sm"
+              />
+            </motion.div>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 };

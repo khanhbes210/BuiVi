@@ -15,7 +15,6 @@ import { formatCurrency, getDiscountPercent } from '../data/products';
 import { Img } from '../components/Img';
 import { PromotionSummary } from '../components/PromotionSummary';
 import { CheckoutStepper } from '../components/CheckoutStepper';
-import { FeaturedProductsBlock } from '../components/FeaturedProductsBlock';
 import {
   AnimatedPrice,
   AnimationSlot,
@@ -320,11 +319,11 @@ export const CartPage: React.FC = () => {
               ))}
             </div>
 
-            {/* RIGHT: Promotion Summary & Checkout CTA */}
+            {/* RIGHT: Promotion Summary & Checkout CTA (Step 1 -> Step 2: Thông tin giao hàng) */}
             <div className="lg:col-span-5 lg:sticky lg:top-24">
               <PromotionSummary
                 promotion={cartPromotion}
-                primaryCtaLabel="Tiến hành thanh toán"
+                primaryCtaLabel="Tiếp tục điền thông tin giao hàng"
                 onPrimaryCtaClick={() => navigate('/thanh-toan')}
               />
             </div>
@@ -346,20 +345,14 @@ export const CartPage: React.FC = () => {
             <button
               type="button"
               onClick={() => navigate('/thanh-toan')}
-              className="btn-sheen font-body min-h-[54px] px-6 py-3 rounded-xl bg-[#951722] hover:bg-[#9B0514] active:scale-[0.98] text-[#FFF5E4] text-[17px] leading-normal tracking-[0.2px] whitespace-nowrap flex items-center gap-2 cursor-pointer transition-all"
+              className="btn-sheen font-body min-h-[54px] px-5 py-3 rounded-xl bg-[#951722] hover:bg-[#9B0514] active:scale-[0.98] text-[#FFF5E4] text-[16px] leading-normal tracking-[0.2px] whitespace-nowrap flex items-center gap-2 cursor-pointer transition-all"
             >
-              <span>Tiến hành thanh toán</span>
+              <span>Điền thông tin giao hàng</span>
               <ArrowRight className="w-5 h-5" />
             </button>
           </div>
         </div>
       )}
-
-      {/* Suggested Products Below Cart */}
-      <FeaturedProductsBlock
-        title="Gợi Ý Mua Kèm Để Nhận Thêm Ưu Đãi"
-        subtitle="Mua từ 2 Set quà bất kỳ để nhận ngay 01 hộp Nem chua (0đ) hoặc đạt 500.000đ để được Miễn phí vận chuyển"
-      />
     </div>
   );
 };

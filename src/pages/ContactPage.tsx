@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 import {
   Phone,
   Mail,
@@ -7,26 +8,81 @@ import {
   Send,
   CheckCircle2,
   MessageSquare,
+  ChevronDown,
+  Check,
+  Sparkles,
 } from 'lucide-react';
 import { SITE_CONFIG, isPlaceholder } from '../data/siteConfig';
 import { FeaturedProductsBlock } from '../components/FeaturedProductsBlock';
 import { useStore } from '../context/StoreContext';
-import { Reveal, Stagger } from '../motion';
+import { MOTION_TOKENS, Reveal, Stagger, useMotionPreferences } from '../motion';
+
+const CONTACT_TOPICS = [
+  {
+    value: 'Đặt hàng quà biếu doanh nghiệp / số lượng lớn',
+    label: 'Đặt hàng quà biếu doanh nghiệp / số lượng lớn',
+    desc: 'Chiết khấu ưu đãi, in thiệp & đóng hộp lục giác giấy Điệp theo yêu cầu',
+  },
+  {
+    value: 'Hỏi đáp về sản phẩm & bảo quản Nem Kinh Bắc',
+    label: 'Hỏi đáp về sản phẩm & bảo quản Nem Kinh Bắc',
+    desc: 'Tư vấn độ chín, cách thưởng thức và bảo quản lạnh chuẩn vị Bùi Xá',
+  },
+  {
+    value: 'Tham quan Không gian Di sản Bùi Vị',
+    label: 'Tham quan Không gian Di sản Bùi Vị',
+    desc: 'Đặt lịch trải nghiệm quy trình gói nem lá sung & tranh Đông Hồ',
+  },
+  {
+    value: 'Khác',
+    label: 'Nội dung khác (Góp ý dịch vụ / Hợp tác đại lý)',
+    desc: 'Các yêu cầu hỗ trợ đơn hàng hoặc đề xuất hợp tác thương mại',
+  },
+] as const;
 
 export const ContactPage: React.FC = () => {
   const { showToast } = useStore();
+  const { reducedMotion } = useMotionPreferences();
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
-  const [topic, setTopic] = useState('Đặt hàng quà biếu doanh nghiệp / số lượng lớn');
+  const [topic, setTopic] = useState<string>(CONTACT_TOPICS[0].value);
+  const [topicOpen, setTopicOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
   const [shakeForm, setShakeForm] = useState(false);
+  const topicDropdownRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     document.title = 'Liên Hệ & Hệ Thống Cửa Hàng | BÙI VỊ – Quà Biếu Di Sản';
   }, []);
+
+  useEffect(() => {
+    if (!topicOpen) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        topicDropdownRef.current &&
+        !topicDropdownRef.current.contains(event.target as Node)
+      ) {
+        setTopicOpen(false);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setTopicOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [topicOpen]);
+
+  const selectedTopicObj =
+    CONTACT_TOPICS.find((item) => item.value === topic) || CONTACT_TOPICS[0];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,8 +138,9 @@ export const ContactPage: React.FC = () => {
                   <span>Đã tiếp nhận thông tin liên hệ của quý khách!</span>
                 </div>
                 <p className="text-sm text-[#FFF5E4]/90 leading-relaxed">
-                  Cảm ơn <strong>{fullName}</strong> ({phone}). Bộ phận Chăm sóc Khách hàng Bùi Vị
-                  sẽ liên hệ lại với quý khách trong vòng 30 phút làm việc.
+                  Cảm ơn <strong>{fullName}</strong> ({phone}) đã gửi yêu cầu về chủ đề{' '}
+                  <strong className="text-[#F3D27A]">{selectedTopicObj.label}</strong>. Bộ phận Chăm
+                  sóc Khách hàng Bùi Vị sẽ liên hệ lại với quý khách trong vòng 30 phút làm việc.
                 </p>
                 <button
                   type="button"
@@ -139,8 +196,9 @@ export const ContactPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
+                {/* Balanced 5/7 column split so "Chủ đề quan tâm" fits long Vietnamese labels comfortably */}
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-start">
+                  <div className="sm:col-span-5">
                     <label
                       htmlFor="contact-email"
                       className="block text-sm font-bold text-[#171815] mb-1.5"
@@ -153,33 +211,124 @@ export const ContactPage: React.FC = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="email@example.com"
-                      className="w-full min-h-[48px] px-4 py-2.5 rounded-xl bg-[#FFF5E4] border border-[#951722]/30 text-sm focus:outline-none focus:ring-2 focus:ring-[#951722]"
+                      className="w-full min-h-[50px] px-4 py-2.5 rounded-xl bg-[#FFF5E4] border border-[#951722]/30 text-sm focus:outline-none focus:ring-2 focus:ring-[#951722]"
                     />
                   </div>
-                  <div>
+
+                  {/* Custom Bùi Vị Heritage Dropdown for "Chủ đề quan tâm" */}
+                  <div className="sm:col-span-7 relative" ref={topicDropdownRef}>
                     <label
-                      htmlFor="contact-topic"
+                      id="contact-topic-label"
                       className="block text-sm font-bold text-[#171815] mb-1.5"
                     >
                       Chủ đề quan tâm
                     </label>
-                    <select
+                    <button
+                      type="button"
                       id="contact-topic"
-                      value={topic}
-                      onChange={(e) => setTopic(e.target.value)}
-                      className="w-full min-h-[48px] px-3 py-2.5 rounded-xl bg-[#FFF5E4] border border-[#951722]/30 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#951722]"
+                      data-testid="contact-topic-trigger"
+                      aria-haspopup="listbox"
+                      aria-expanded={topicOpen}
+                      aria-labelledby="contact-topic-label"
+                      onClick={() => setTopicOpen((prev) => !prev)}
+                      className={`w-full min-h-[50px] px-3.5 py-2.5 rounded-xl bg-[#FFF5E4] border text-left flex items-center justify-between gap-2.5 transition-all cursor-pointer ${
+                        topicOpen
+                          ? 'border-[#951722] ring-2 ring-[#951722]/25 bg-[#FFFBF2]'
+                          : 'border-[#951722]/35 hover:border-[#951722]/70'
+                      }`}
                     >
-                      <option value="Đặt hàng quà biếu doanh nghiệp / số lượng lớn">
-                        Đặt hàng quà biếu doanh nghiệp / số lượng lớn
-                      </option>
-                      <option value="Hỏi đáp về sản phẩm & bảo quản Nem Kinh Bắc">
-                        Hỏi đáp về sản phẩm & bảo quản Nem Kinh Bắc
-                      </option>
-                      <option value="Tham quan Không gian Di sản Bùi Vị">
-                        Tham quan Không gian Di sản Bùi Vị
-                      </option>
-                      <option value="Khác">Nội dung khác</option>
-                    </select>
+                      <span className="flex items-center gap-2 min-w-0 flex-1">
+                        <Sparkles className="w-4 h-4 text-[#951722] shrink-0" />
+                        <span className="text-sm font-semibold text-[#171815] leading-snug break-words">
+                          {selectedTopicObj.label}
+                        </span>
+                      </span>
+                      <span
+                        className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                          topicOpen
+                            ? 'bg-[#951722] text-[#FFF5E4]'
+                            : 'bg-[#951722]/10 text-[#951722]'
+                        }`}
+                      >
+                        <ChevronDown
+                          className={`w-4 h-4 transition-transform duration-200 ${
+                            topicOpen ? 'rotate-180' : ''
+                          }`}
+                        />
+                      </span>
+                    </button>
+
+                    <AnimatePresence initial={false}>
+                      {topicOpen && (
+                        <motion.div
+                          key="contact-topic-menu"
+                          role="listbox"
+                          aria-labelledby="contact-topic-label"
+                          data-testid="contact-topic-listbox"
+                          initial={
+                            reducedMotion ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.98 }
+                          }
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={
+                            reducedMotion ? { opacity: 0 } : { opacity: 0, y: -4, scale: 0.98 }
+                          }
+                          transition={{
+                            duration: MOTION_TOKENS.durations.fast,
+                            ease: MOTION_TOKENS.easings.standard,
+                          }}
+                          className="absolute left-0 right-0 mt-2 z-30 rounded-2xl bg-[#FFFBF2] border-2 border-[#951722]/45 shadow-xl overflow-hidden divide-y divide-[#951722]/10"
+                        >
+                          <div className="px-3.5 py-2 bg-[#1F3D2A] text-[#F3D27A] text-[11px] font-bold uppercase tracking-wider flex items-center justify-between">
+                            <span>Chọn chủ đề cần Bùi Vị tư vấn</span>
+                            <span>{CONTACT_TOPICS.length} lựa chọn</span>
+                          </div>
+                          {CONTACT_TOPICS.map((item) => {
+                            const isSelected = item.value === topic;
+                            return (
+                              <button
+                                key={item.value}
+                                type="button"
+                                role="option"
+                                aria-selected={isSelected}
+                                onClick={() => {
+                                  setTopic(item.value);
+                                  setTopicOpen(false);
+                                }}
+                                className={`w-full px-4 py-3 text-left flex items-start justify-between gap-3 transition-colors cursor-pointer ${
+                                  isSelected
+                                    ? 'bg-[#951722]/10 text-[#951722]'
+                                    : 'hover:bg-[#FFF5E4] text-[#171815]'
+                                }`}
+                              >
+                                <div className="space-y-0.5 min-w-0 flex-1">
+                                  <p
+                                    className={`text-sm leading-snug ${
+                                      isSelected
+                                        ? 'font-bold text-[#951722]'
+                                        : 'font-semibold text-[#171815]'
+                                    }`}
+                                  >
+                                    {item.label}
+                                  </p>
+                                  <p className="text-xs text-[#171815]/65 leading-relaxed">
+                                    {item.desc}
+                                  </p>
+                                </div>
+                                <span
+                                  className={`mt-0.5 w-5 h-5 rounded-full flex items-center justify-center shrink-0 border transition-colors ${
+                                    isSelected
+                                      ? 'bg-[#1F3D2A] border-[#1F3D2A] text-[#F3D27A]'
+                                      : 'border-[#951722]/30 bg-[#FFFBF2]'
+                                  }`}
+                                >
+                                  {isSelected && <Check className="w-3 h-3" />}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
 
@@ -256,30 +405,27 @@ export const ContactPage: React.FC = () => {
                   </div>
                 )}
 
-              {(!isPlaceholder(SITE_CONFIG.contact.email) ||
-                !isPlaceholder(SITE_CONFIG.contact.fanpageDisplay)) && (
+              {!isPlaceholder(SITE_CONFIG.contact.email) && (
                 <div className="p-4 rounded-xl bg-[#FFF5E4]/10 border border-[#F3D27A]/30 flex items-start gap-3">
                   <Mail className="w-5 h-5 text-[#F3D27A] shrink-0 mt-0.5" />
                   <div>
-                    <span className="text-xs text-[#FFF5E4]/75 block">Email & Fanpage:</span>
-                    {!isPlaceholder(SITE_CONFIG.contact.email) && (
-                      <p className="font-bold">{SITE_CONFIG.contact.email}</p>
-                    )}
-                    {!isPlaceholder(SITE_CONFIG.contact.fanpageDisplay) && (
-                      <p className="text-xs text-[#F3D27A] mt-0.5">
-                        Fanpage: {SITE_CONFIG.contact.fanpageDisplay}
-                      </p>
-                    )}
+                    <span className="text-xs text-[#FFF5E4]/75 block">Email Chăm Sóc & B2B:</span>
+                    <a
+                      href={`mailto:${SITE_CONFIG.contact.email}`}
+                      className="font-bold text-base text-[#FFF5E4] hover:text-[#F3D27A]"
+                    >
+                      {SITE_CONFIG.contact.email}
+                    </a>
                   </div>
                 </div>
               )}
 
-              {!isPlaceholder(SITE_CONFIG.contact.workingHours) && (
+              {!isPlaceholder(SITE_CONFIG.contact.openingHours) && (
                 <div className="p-4 rounded-xl bg-[#FFF5E4]/10 border border-[#F3D27A]/30 flex items-start gap-3">
                   <Clock className="w-5 h-5 text-[#F3D27A] shrink-0 mt-0.5" />
                   <div>
-                    <span className="text-xs text-[#FFF5E4]/75 block">Khung giờ phục vụ:</span>
-                    <p className="font-semibold">{SITE_CONFIG.contact.workingHours}</p>
+                    <span className="text-xs text-[#FFF5E4]/75 block">Khung Giờ Phục Vụ:</span>
+                    <span className="font-semibold">{SITE_CONFIG.contact.openingHours}</span>
                   </div>
                 </div>
               )}
@@ -287,75 +433,81 @@ export const ContactPage: React.FC = () => {
           </section>
         </div>
 
-        {/* HỆ THỐNG CỬA HÀNG (#he-thong-cua-hang) — renders only store.visible === true and hides placeholder fields (P0-2) */}
+        {/* SECTION: Hệ Thống Cửa Hàng (#he-thong-cua-hang) */}
         <section id="he-thong-cua-hang" className="scroll-mt-24 space-y-6">
           <Reveal>
-            <div>
+            <div className="border-b-2 border-[#951722]/20 pb-3">
               <span className="text-xs font-bold uppercase tracking-widest text-[#1F3D2A]">
                 Địa chỉ trải nghiệm & Mua trực tiếp
               </span>
               <h2 className="font-display text-2xl md:text-3xl text-[#951722] mt-1">
-                Hệ Thống Cửa Hàng & Xưởng Chế Tác Bùi Vị
+                Hệ Thống Không Gian Di Sản & Cửa Hàng Bùi Vị
               </h2>
             </div>
           </Reveal>
 
-          <Stagger className="grid grid-cols-1 gap-6">
-            {SITE_CONFIG.stores
-              .filter((store) => store.visible)
-              .map((store) => {
-                const hasRealMap =
-                  !isPlaceholder(store.mapQuery) &&
-                  (store.mapQuery.startsWith('http') || /^[0-9.,\s+-]+$/.test(store.mapQuery));
-
-                return (
-                  <div
-                    key={store.id}
-                    className="bg-[#FFFBF2] border-2 border-[#951722]/25 rounded-2xl p-6 md:p-8 flex flex-col justify-between space-y-4 transition-transform duration-300 md:hover:-translate-y-0.5 hover:shadow-md"
-                  >
-                    <div className="space-y-3">
-                      <h3 className="font-display text-2xl text-[#951722]">{store.name}</h3>
-
-                      {!isPlaceholder(store.address) && (
-                        <p className="text-base text-[#171815] flex items-start gap-2.5">
-                          <MapPin className="w-5 h-5 text-[#1F3D2A] shrink-0 mt-0.5" />
-                          <span>{store.address}</span>
-                        </p>
-                      )}
-
-                      {!isPlaceholder(store.phone) && (
-                        <p className="text-sm text-[#171815] flex items-center gap-2.5">
-                          <Phone className="w-4 h-4 text-[#951722] shrink-0" />
-                          <span className="font-body">{store.phone}</span>
-                        </p>
-                      )}
-
-                      {!isPlaceholder(store.hours) && (
-                        <p className="text-sm text-[#171815]/80 flex items-center gap-2.5">
-                          <Clock className="w-4 h-4 text-[#1F3D2A] shrink-0" />
-                          <span>{store.hours}</span>
-                        </p>
-                      )}
-
-                      {!isPlaceholder(store.note) && (
-                        <p className="text-sm text-[#1F3D2A] bg-[#FFF5E4] p-3.5 rounded-xl border border-[#1F3D2A]/20">
-                          {store.note}
-                        </p>
-                      )}
-                    </div>
-
-                    {hasRealMap && (
-                      <div className="h-44 rounded-xl bg-[#F5E6CC] border border-[#951722]/25 relative overflow-hidden flex items-center justify-center p-4 text-center">
-                        <p className="text-xs font-bold text-[#171815]">{store.mapQuery}</p>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+          <Stagger className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {SITE_CONFIG.stores.map((store, idx) => (
+              <div
+                key={idx}
+                className="bg-[#FFFBF2] border-2 border-[#951722]/25 rounded-2xl p-6 space-y-3 shadow-xs transition-all duration-300 md:hover:-translate-y-1 hover:shadow-md"
+              >
+                <span className="inline-block text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-[#1F3D2A] text-[#F3D27A]">
+                  Cơ sở {idx + 1}
+                </span>
+                <h3 className="font-display text-xl text-[#951722]">{store.name}</h3>
+                {!isPlaceholder(store.address) && (
+                  <p className="text-sm text-[#171815]/85 flex items-start gap-2">
+                    <MapPin className="w-4 h-4 text-[#951722] shrink-0 mt-1" />
+                    <span>{store.address}</span>
+                  </p>
+                )}
+                {!isPlaceholder(store.phone) && (
+                  <p className="text-sm text-[#171815]/85 flex items-center gap-2">
+                    <Phone className="w-4 h-4 text-[#1F3D2A] shrink-0" />
+                    <span className="font-price">{store.phone}</span>
+                  </p>
+                )}
+                {!isPlaceholder(store.hours) && (
+                  <p className="text-xs text-[#171815]/70 flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-[#1F3D2A] shrink-0" />
+                    <span>Giờ mở cửa: {store.hours}</span>
+                  </p>
+                )}
+              </div>
+            ))}
           </Stagger>
+        </section>
+
+        {/* SECTION: Bản Đồ Chỉ Đường (#ban-do) */}
+        <section id="ban-do" className="scroll-mt-24 space-y-4">
+          <Reveal>
+            <h2 className="font-display text-2xl md:text-3xl text-[#951722]">
+              Bản Đồ Chỉ Đường Đến Làng Nghề Bùi Xá & Showroom
+            </h2>
+          </Reveal>
+          <div className="bg-[#FFFBF2] border-2 border-[#951722]/30 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="space-y-2 max-w-xl">
+              <p className="font-display text-xl text-[#1F3D2A]">
+                Không gian Di sản Bùi Vị – Thị xã Thuận Thành, Tỉnh Bắc Ninh
+              </p>
+              <p className="text-sm text-[#171815]/80 leading-relaxed">
+                Cách trung tâm Thủ đô Hà Nội 35 phút di chuyển theo hướng Quốc lộ 17. Quý khách đoàn
+                tham quan hoặc đặt tiệc trải nghiệm gói nem lá sung vui lòng liên hệ trước qua
+                Hotline để Bùi Vị chuẩn bị chu đáo nhất.
+              </p>
+            </div>
+            <a
+              href="#form-lien-he"
+              className="btn-sheen px-6 py-3 rounded-xl bg-[#951722] text-[#FFF5E4] font-bold text-sm hover:bg-[#9B0514] whitespace-nowrap transition-colors"
+            >
+              Đặt lịch hẹn tham quan
+            </a>
+          </div>
         </section>
       </div>
 
+      {/* Featured Products Block */}
       <FeaturedProductsBlock />
     </div>
   );

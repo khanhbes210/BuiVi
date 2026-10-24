@@ -8,10 +8,11 @@ import {
   MapPin,
   Clock,
   ShoppingBag,
+  CheckCircle2,
+  AlertTriangle,
 } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { formatCurrency } from '../data/products';
-import { FeaturedProductsBlock } from '../components/FeaturedProductsBlock';
 import { CheckoutStepper } from '../components/CheckoutStepper';
 import { AnimationSlot, Reveal, Stagger } from '../motion';
 
@@ -19,22 +20,23 @@ export const OrderSuccessPage: React.FC = () => {
   const { lastPlacedOrder } = useStore();
 
   useEffect(() => {
-    document.title = 'Đặt Hàng Thành Công | BÙI VỊ – Quà Biếu Di Sản';
+    document.title = 'Bước 4: Kết Quả Đặt Hàng Thành Công | BÙI VỊ – Quà Biếu Di Sản';
   }, []);
 
   return (
     <div>
       <div className="py-10 md:py-16 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <CheckoutStepper currentStep={3} />
+        <CheckoutStepper currentStep="completed" />
         <div className="bg-[#FFFBF2] double-border-forest rounded-3xl p-6 md:p-10 space-y-8 shadow-md">
           {/* Header with Animation Slot #7: order-success-stamp */}
           <div className="text-center space-y-3">
             <AnimationSlot id="order-success-stamp" className="max-w-[240px] mx-auto" />
-            <span className="text-xs font-bold uppercase tracking-widest text-[#1F3D2A] block pt-1">
-              Cảm ơn quý khách đã trao gửi niềm tin
-            </span>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#1F3D2A] text-[#F3D27A] text-xs font-bold uppercase tracking-wider">
+              <CheckCircle2 className="w-4 h-4" />
+              <span>Bước 4 · Hoàn tất đơn hàng · Trạng thái: Đã xác nhận</span>
+            </div>
             <h1 className="font-display text-3xl md:text-4xl text-[#951722]">
-              Đặt Hàng Thành Công!
+              Kết Quả Đặt Hàng: Thành Công!
             </h1>
             {lastPlacedOrder && (
               <p className="text-base text-[#171815]/85">
@@ -69,14 +71,14 @@ export const OrderSuccessPage: React.FC = () => {
                 <div className="space-y-1.5">
                   <p className="font-bold text-[#1F3D2A] flex items-center gap-1.5">
                     <Clock className="w-4 h-4 text-[#951722]" />
-                    <span>Thời gian giao hàng dự kiến:</span>
+                    <span>Trạng thái & Thời gian giao dự kiến:</span>
                   </p>
                   <p className="font-bold text-[#171815]">{lastPlacedOrder.estimatedDelivery}</p>
                   <p className="text-[#171815]/80">
                     Phương thức:{' '}
                     {lastPlacedOrder.paymentMethod === 'qr'
-                      ? 'Chuyển khoản QR (Đã xác nhận)'
-                      : 'Thanh toán khi nhận hàng (COD)'}
+                      ? 'Chuyển khoản QR (Đã xác nhận thanh toán)'
+                      : 'Thanh toán khi nhận hàng (COD – Đang chuẩn bị quà)'}
                   </p>
                 </div>
               </div>
@@ -160,7 +162,7 @@ export const OrderSuccessPage: React.FC = () => {
             </Stagger>
           )}
 
-          {/* Two Large Mandatory CTAs (Addendum #8) */}
+          {/* Two Large Mandatory CTAs */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
             <Link
               to="/"
@@ -179,8 +181,6 @@ export const OrderSuccessPage: React.FC = () => {
           </div>
         </div>
       </div>
-
-      <FeaturedProductsBlock />
     </div>
   );
 };
@@ -189,22 +189,23 @@ export const PaymentFailedPage: React.FC = () => {
   const { appliedVoucherCode, totalCartItemsCount, setSimulatePaymentFailure } = useStore();
 
   useEffect(() => {
-    document.title = 'Thanh Toán Chưa Hoàn Tất | BÙI VỊ';
+    document.title = 'Bước 4: Kết Quả Thanh Toán Chưa Hoàn Tất | BÙI VỊ';
   }, []);
 
   return (
     <div>
       <div className="py-12 md:py-16 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <CheckoutStepper currentStep={3} />
+        <CheckoutStepper currentStep="failed" />
         <div className="bg-[#FFFBF2] border-2 border-[#9B0514]/40 rounded-3xl p-6 md:p-10 text-center space-y-6 shadow-md">
           {/* Animation Slot #8: payment-failed */}
           <AnimationSlot id="payment-failed" className="max-w-[240px] mx-auto" />
 
           <Reveal>
-            <div className="space-y-2">
-              <span className="text-xs uppercase tracking-widest text-[#9B0514]">
-                Giao dịch gián đoạn
-              </span>
+            <div className="space-y-2.5">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#9B0514]/15 text-[#9B0514] text-xs font-bold uppercase tracking-wider">
+                <AlertTriangle className="w-4 h-4" />
+                <span>Bước 4 · Kết quả giao dịch · Trạng thái: Chưa hoàn tất</span>
+              </div>
               <h1 className="font-display text-3xl md:text-4xl text-[#9B0514]">
                 Thanh Toán Chưa Thành Công
               </h1>
@@ -234,7 +235,7 @@ export const PaymentFailedPage: React.FC = () => {
             </Link>
 
             <Link
-              to="/thanh-toan"
+              to="/thanh-toan?step=3"
               onClick={() => setSimulatePaymentFailure(false)}
               className="btn-sheen font-body min-h-[56px] px-6 py-3.5 rounded-xl border-2 border-[#1F3D2A] text-[#1F3D2A] hover:bg-[#1F3D2A] hover:text-[#FFF5E4] active:scale-[0.98] text-[17px] leading-normal tracking-[0.2px] whitespace-nowrap flex items-center justify-center gap-2 transition-all"
             >
@@ -244,8 +245,6 @@ export const PaymentFailedPage: React.FC = () => {
           </div>
         </div>
       </div>
-
-      <FeaturedProductsBlock />
     </div>
   );
 };
