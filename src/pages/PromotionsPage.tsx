@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Ticket, Gift, Sparkles } from 'lucide-react';
-import { VOUCHERS } from '../data/vouchers';
+import { VOUCHERS, Voucher } from '../data/vouchers';
 import { PRODUCTS, formatPrice, getDiscountPercent } from '../data/products';
 import { VoucherCard } from '../components/VoucherCard';
 import { MediaSlot } from '../components/MediaSlot';
@@ -48,6 +48,18 @@ export const PromotionsPage: React.FC = () => {
   const comboProduct = PRODUCTS.find((p) => p.id === 'prod-combo-3-set')!;
   const comboDiscount = getDiscountPercent(comboProduct.price, comboProduct.oldPrice);
 
+  const handleBuyNowWithVoucher = (v: Voucher) => {
+    const defaultPid = v.defaultEligibleProductIds?.[0];
+    const qty = v.defaultBuyNowQuantity || 1;
+    if (defaultPid) {
+      startBuyNow(defaultPid, qty, undefined, v.code);
+      navigate('/thanh-toan?mode=buynow');
+    } else {
+      saveVoucherForLater(v.code);
+      navigate('/san-pham');
+    }
+  };
+
   return (
     <div lang="vi">
       <div className="py-8 md:py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
@@ -65,27 +77,27 @@ export const PromotionsPage: React.FC = () => {
               <h1 className="font-display text-3xl md:text-4xl text-[#FFF5E4]">
                 Chương Trình Khuyến Mãi & Combo Quà Tặng
               </h1>
-              <p lang="vi" className="story-justify text-base text-[#FFF5E4]/85 leading-[1.7]">
-                Mọi mã ưu đãi của Bùi Vị đều hiển thị rõ phần trăm giảm giá, điều kiện đơn tối thiểu
-                và quy định cộng gộp. Khi bạn bấm “Dùng mã này” hoặc “Mua ngay”, hệ thống sẽ tự động
-                tính toán mức ưu đãi tốt nhất trong Giỏ hàng và Thanh toán nhanh.
+              <p lang="vi" className="text-base text-[#FFF5E4]/90 leading-[1.7] text-left">
+                Mọi mã ưu đãi của Bùi Vị đều hiển thị rõ mức giảm giá, điều kiện đơn tối thiểu và
+                quy định cộng gộp. Khi bạn bấm “Dùng mã này” hoặc “Mua ngay”, hệ thống sẽ tự động
+                áp dụng mã và tính toán mức tiết kiệm tối ưu trong Giỏ hàng & Thanh toán.
               </p>
               <div className="flex flex-wrap gap-3 pt-2">
                 <a
                   href="#uu-dai-hot"
-                  className="btn-sheen px-4 py-2 rounded-xl bg-[#951722] text-[#FFF5E4] font-bold text-sm hover:bg-[#9B0514] transition-colors"
+                  className="btn-sheen px-4 py-2.5 rounded-xl bg-[#951722] text-[#FFF5E4] font-bold text-sm hover:bg-[#9B0514] transition-colors"
                 >
                   1. Ưu đãi hot / Khuyến mãi ({hotVouchers.length})
                 </a>
                 <a
                   href="#combo-qua-tang"
-                  className="btn-sheen px-4 py-2 rounded-xl bg-[#FFF5E4]/15 text-[#F3D27A] font-bold text-sm hover:bg-[#FFF5E4]/25 transition-colors"
+                  className="btn-sheen px-4 py-2.5 rounded-xl bg-[#FFF5E4]/15 text-[#F3D27A] font-bold text-sm hover:bg-[#FFF5E4]/25 transition-colors"
                 >
                   2. Combo & Quà tặng ({comboVouchers.length})
                 </a>
                 <a
                   href="#bang-so-sanh"
-                  className="btn-sheen px-4 py-2 rounded-xl bg-[#FFF5E4]/15 text-[#FFF5E4] font-bold text-sm hover:bg-[#FFF5E4]/25 transition-colors"
+                  className="btn-sheen px-4 py-2.5 rounded-xl bg-[#FFF5E4]/15 text-[#FFF5E4] font-bold text-sm hover:bg-[#FFF5E4]/25 transition-colors"
                 >
                   3. Bảng so sánh các Voucher
                 </a>
@@ -95,30 +107,31 @@ export const PromotionsPage: React.FC = () => {
         </Reveal>
 
         {/* SUB-SECTION 1: ƯU ĐÃI HOT / KHUYẾN MÃI */}
-        <section id="uu-dai-hot" className="scroll-mt-24 space-y-6">
+        <section id="uu-dai-hot" className="scroll-mt-32 space-y-6">
           <Reveal>
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b-2 border-[#951722]/20 pb-4">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b-2 border-[#951722]/20 pb-4">
               <div>
                 <span className="text-xs font-bold uppercase tracking-widest text-[#1F3D2A] flex items-center gap-1.5">
-                  <Ticket className="w-4 h-4 text-[#951722]" />
+                  <Ticket className="w-4 h-4 text-[#951722] shrink-0" />
                   <span>Phần 1 · Mã giảm giá trực tiếp & Vận chuyển</span>
                 </span>
                 <h2 className="font-display text-2xl md:text-3xl text-[#951722] mt-1">
                   Ưu Đãi Hot / Khuyến Mãi Đang Áp Dụng
                 </h2>
               </div>
-              <p lang="vi" className="story-justify text-xs font-semibold text-[#1F3D2A] leading-[1.7]">
-                Mẹo: Mã FREESHIP (đơn từ 500.000đ) được cộng gộp cùng mọi mã giảm giá đơn hàng!
-              </p>
+              <div className="px-3.5 py-2 rounded-xl bg-[#1F3D2A]/10 border border-[#1F3D2A]/20 text-xs sm:text-sm font-semibold text-[#1F3D2A] leading-snug md:max-w-md text-left">
+                Mẹo: Mã <strong className="text-[#951722]">FREESHIP</strong> (đơn từ 500.000đ) được
+                cộng gộp cùng mọi mã giảm giá đơn hàng và quà tặng!
+              </div>
             </div>
           </Reveal>
 
-          <Stagger className="grid grid-cols-1 lg:grid-cols-2 gap-7">
+          <Stagger className="grid grid-cols-1 lg:grid-cols-2 gap-7 items-stretch">
             {hotVouchers.map((voucher) => (
               <div
                 key={voucher.code}
                 id={`ma-voucher-${voucher.code}`}
-                className="scroll-mt-28"
+                className="scroll-mt-32 h-full"
               >
                 <VoucherCard
                   voucher={voucher}
@@ -130,27 +143,31 @@ export const PromotionsPage: React.FC = () => {
         </section>
 
         {/* SUB-SECTION 2: COMBO & QUÀ TẶNG */}
-        <section id="combo-qua-tang" className="scroll-mt-24 space-y-6">
+        <section id="combo-qua-tang" className="scroll-mt-32 space-y-6">
           <Reveal>
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b-2 border-[#951722]/20 pb-4">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b-2 border-[#951722]/20 pb-4">
               <div>
                 <span className="text-xs font-bold uppercase tracking-widest text-[#1F3D2A] flex items-center gap-1.5">
-                  <Gift className="w-4 h-4 text-[#951722]" />
+                  <Gift className="w-4 h-4 text-[#951722] shrink-0" />
                   <span>Phần 2 · Ưu đãi tự động kích hoạt trong giỏ hàng</span>
                 </span>
                 <h2 className="font-display text-2xl md:text-3xl text-[#951722] mt-1">
                   Combo & Quà Tặng Di Sản
                 </h2>
               </div>
+              <div className="px-3.5 py-2 rounded-xl bg-[#951722]/10 border border-[#951722]/20 text-xs sm:text-sm font-semibold text-[#951722] leading-snug md:max-w-md text-left">
+                Tự động tặng thêm <strong className="text-[#1F3D2A]">01 hộp Nem chua (85.000đ)</strong>{' '}
+                khi mua từ 02 Set quà hoặc 01 Combo 3 hộp quà!
+              </div>
             </div>
           </Reveal>
 
-          <Stagger className="grid grid-cols-1 lg:grid-cols-2 gap-7">
+          <Stagger className="grid grid-cols-1 lg:grid-cols-2 gap-7 items-stretch">
             {comboVouchers.map((voucher) => (
               <div
                 key={voucher.code}
                 id={`ma-voucher-${voucher.code}`}
-                className="scroll-mt-28"
+                className="scroll-mt-32 h-full"
               >
                 <VoucherCard
                   voucher={voucher}
@@ -178,8 +195,8 @@ export const PromotionsPage: React.FC = () => {
                 </span>
               </Link>
 
-              <div className="lg:col-span-7 space-y-4">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#1F3D2A]">
+              <div className="lg:col-span-7 space-y-4 text-left">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#1F3D2A] block">
                   Gói ưu đãi lớn nhất mùa Lễ/Tết · {comboProduct.packSpec}
                 </span>
                 <Link
@@ -190,7 +207,7 @@ export const PromotionsPage: React.FC = () => {
                 </Link>
                 <p
                   lang="vi"
-                  className="story-justify text-sm md:text-base text-[#171815]/85 leading-[1.7]"
+                  className="text-sm md:text-base text-[#171815]/85 leading-[1.7] text-left"
                 >
                   {comboProduct.longDesc}
                 </p>
@@ -215,7 +232,7 @@ export const PromotionsPage: React.FC = () => {
                   <BuyNowButton
                     product={comboProduct}
                     onClick={() => {
-                      startBuyNow(comboProduct.id, 1, comboProduct.packOptions[0]);
+                      startBuyNow(comboProduct.id, 1, comboProduct.packOptions[0], 'COMBO3');
                       navigate('/thanh-toan?mode=buynow');
                     }}
                   />
@@ -226,7 +243,7 @@ export const PromotionsPage: React.FC = () => {
         </section>
 
         {/* SUB-SECTION 3: BẢNG SO SÁNH CÁC VOUCHER */}
-        <section id="bang-so-sanh" className="scroll-mt-24 space-y-4">
+        <section id="bang-so-sanh" className="scroll-mt-32 space-y-4">
           <Reveal>
             <div className="border-b-2 border-[#951722]/20 pb-3">
               <span className="text-xs font-bold uppercase tracking-widest text-[#1F3D2A] block">
@@ -241,14 +258,14 @@ export const PromotionsPage: React.FC = () => {
               <table className="w-full text-left border-collapse text-sm">
                 <thead>
                   <tr className="bg-[#1F3D2A] text-[#FFF5E4]">
-                    <th className="p-4 font-bold">Mã Voucher</th>
-                    <th className="p-4 font-bold">Giá trị ưu đãi</th>
-                    <th className="p-4 font-bold">Đơn tối thiểu</th>
-                    <th className="p-4 font-bold">Giảm tối đa</th>
+                    <th className="p-4 font-bold whitespace-nowrap">Mã Voucher</th>
+                    <th className="p-4 font-bold whitespace-nowrap">Giá trị ưu đãi</th>
+                    <th className="p-4 font-bold whitespace-nowrap">Đơn tối thiểu</th>
+                    <th className="p-4 font-bold whitespace-nowrap">Giảm tối đa</th>
                     <th className="p-4 font-bold">Sản phẩm áp dụng</th>
-                    <th className="p-4 font-bold">Cộng gộp</th>
-                    <th className="p-4 font-bold">Thời hạn</th>
-                    <th className="p-4 font-bold text-right">Thao tác</th>
+                    <th className="p-4 font-bold">Quy định cộng gộp</th>
+                    <th className="p-4 font-bold whitespace-nowrap">Thời hạn</th>
+                    <th className="p-4 font-bold text-right whitespace-nowrap">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#951722]/15">
@@ -270,17 +287,27 @@ export const PromotionsPage: React.FC = () => {
                           </span>
                         </td>
                         <td className="p-4 whitespace-nowrap">
-                          <span className="font-price">{formatPrice(v.maxDiscount)}</span>
+                          <span className="font-price text-[#9B0514]">
+                            {formatPrice(v.maxDiscount)}
+                          </span>
                         </td>
-                        <td className="p-4 max-w-xs">{v.applicableProductsText}</td>
-                        <td className="p-4 text-xs">
+                        <td className="p-4 max-w-xs leading-relaxed">
+                          {v.applicableProductsText}
+                        </td>
+                        <td className="p-4 text-xs leading-relaxed">
                           {v.stackable ? (
-                            <span className="font-bold text-[#1F3D2A]">Có cộng gộp</span>
+                            <span className="font-bold text-[#1F3D2A]">
+                              Cộng gộp cùng mọi mã ưu đãi
+                            </span>
                           ) : (
-                            <span className="text-[#171815]/75">Không cộng gộp mã giảm khác</span>
+                            <span className="text-[#171815]/80">
+                              Dùng cùng FREESHIP & TANGHOP
+                            </span>
                           )}
                         </td>
-                        <td className="p-4 whitespace-nowrap text-xs">{v.expiryDisplay}</td>
+                        <td className="p-4 whitespace-nowrap text-xs font-semibold">
+                          {v.expiryDisplay}
+                        </td>
                         <td className="p-4 text-right whitespace-nowrap">
                           <div className="inline-flex items-center gap-2">
                             <button
@@ -292,14 +319,11 @@ export const PromotionsPage: React.FC = () => {
                                   : 'border border-[#1F3D2A] text-[#1F3D2A] hover:bg-[#1F3D2A] hover:text-[#FFF5E4]'
                               }`}
                             >
-                              {isSaved ? 'Đã lưu' : 'Dùng mã này'}
+                              {isSaved ? 'Đã lưu mã' : 'Dùng mã này'}
                             </button>
                             <button
                               type="button"
-                              onClick={() => {
-                                saveVoucherForLater(v.code);
-                                navigate('/san-pham');
-                              }}
+                              onClick={() => handleBuyNowWithVoucher(v)}
                               className="px-3 py-1.5 rounded-lg bg-[#951722] hover:bg-[#9B0514] text-[#FFF5E4] text-xs font-bold cursor-pointer transition-colors"
                             >
                               Mua ngay

@@ -52,9 +52,10 @@ export const VoucherCard: React.FC<VoucherCardProps> = ({
   };
 
   const handleBuyNowEligible = () => {
-    const defaultPid = voucher.defaultEligibleProductIds[0];
+    const defaultPid = voucher.defaultEligibleProductIds?.[0];
+    const qty = voucher.defaultBuyNowQuantity || 1;
     if (defaultPid) {
-      startBuyNow(defaultPid, voucher.defaultBuyNowQuantity, undefined, voucher.code);
+      startBuyNow(defaultPid, qty, undefined, voucher.code);
       navigate('/thanh-toan?mode=buynow');
     } else {
       saveVoucherForLater(voucher.code);
@@ -66,9 +67,7 @@ export const VoucherCard: React.FC<VoucherCardProps> = ({
     <article
       lang="vi"
       data-testid={`voucher-box-${voucher.code}`}
-      className={`group flex-1 w-full ${
-        compact ? 'h-[516px] min-h-[516px]' : 'h-[900px] min-h-[900px]'
-      } bg-[#FFFBF2] border-2 rounded-2xl overflow-hidden shadow-xs flex flex-col justify-between relative transition-all duration-300 md:hover:-translate-y-1 hover:shadow-md ${
+      className={`group h-full w-full bg-[#FFFBF2] border-2 rounded-2xl overflow-hidden shadow-xs flex flex-col justify-between relative transition-all duration-300 md:hover:-translate-y-1 hover:shadow-md ${
         highlighted
           ? 'border-[#951722] ring-4 ring-[#951722]/30 shadow-xl voucher-hash-pulse'
           : 'border-[#951722]/35 hover:border-[#951722]/65'
@@ -77,7 +76,7 @@ export const VoucherCard: React.FC<VoucherCardProps> = ({
       {/* Top Perforated Ticket Header – Clickable to /khuyen-mai#ma-voucher-<code> */}
       <div
         onClick={() => navigate(`/khuyen-mai#ma-voucher-${voucher.code}`)}
-        className="voucher-header-sheen bg-[#1F3D2A] text-[#FFF5E4] p-5 h-[156px] min-h-[156px] shrink-0 flex flex-col justify-center relative border-b-2 border-dashed border-[#FFF5E4]/30 cursor-pointer hover:bg-[#193323] transition-colors"
+        className="voucher-header-sheen bg-[#1F3D2A] text-[#FFF5E4] p-5 min-h-[154px] shrink-0 flex flex-col justify-center relative border-b-2 border-dashed border-[#FFF5E4]/30 cursor-pointer hover:bg-[#193323] transition-colors"
       >
         {/* Left & Right ticket punch cutouts */}
         <div
@@ -91,13 +90,13 @@ export const VoucherCard: React.FC<VoucherCardProps> = ({
 
         <div className="relative z-10 flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <span className="inline-block text-xs uppercase tracking-widest text-[#F3D27A] font-semibold mb-1 line-clamp-1">
+            <span className="inline-block text-xs uppercase tracking-wider text-[#F3D27A] font-semibold mb-1">
               {voucher.countdownText}
             </span>
-            <div className="font-price text-2xl md:text-3xl text-[#FFF5E4] line-clamp-1">
+            <div className="font-price text-2xl md:text-3xl text-[#FFF5E4] leading-tight">
               {voucher.valueText}
             </div>
-            <h3 className="font-display !text-[19px] text-[#FFF5E4]/95 mt-1 leading-[1.3] line-clamp-2 min-h-[49px]">
+            <h3 className="font-display !text-[18px] sm:!text-[19px] text-[#FFF5E4]/95 mt-1.5 leading-[1.35]">
               {voucher.title}
             </h3>
           </div>
@@ -112,11 +111,11 @@ export const VoucherCard: React.FC<VoucherCardProps> = ({
               onClick={handleCopy}
               className="relative mt-2 inline-flex items-center gap-1 text-xs font-semibold text-[#F3D27A] hover:underline cursor-pointer"
             >
-              <MicroConfetti active={confettiTrigger} />
+              <MicroConfetti active={confettiTrigger > 0} />
               {copied ? (
                 <>
                   <Check className="w-3.5 h-3.5" />
-                  <span>Xong</span>
+                  <span>Đã chép</span>
                 </>
               ) : (
                 <>
@@ -129,37 +128,67 @@ export const VoucherCard: React.FC<VoucherCardProps> = ({
         </div>
       </div>
 
-      {/* Body Details — relative container with balanced spacing so buttons never overflow */}
-      <div className="p-5 flex-1 min-h-0 flex flex-col justify-between gap-3 relative overflow-hidden">
-        <div className="flex-1 min-h-0 flex flex-col justify-between space-y-2 text-sm text-[#171815]">
-          <div className="flex items-center justify-between gap-2 py-1 min-h-[32px] shrink-0 border-b border-[#951722]/10">
-            <span className="text-[#171815]/70">Đơn tối thiểu:</span>
-            <span className="font-semibold font-price text-right">
+      {/* Body Details — natural auto-height per row, zero text clipping, left-aligned clean prose */}
+      <div className="p-5 flex-1 flex flex-col justify-between gap-4 relative">
+        {/* Top Metadata Rows */}
+        <div className="space-y-2.5 text-sm text-[#171815] text-left">
+          <div className="flex items-center justify-between gap-3 py-1.5 border-b border-[#951722]/12">
+            <span className="text-[#171815]/70 shrink-0">Đơn tối thiểu:</span>
+            <span className="font-semibold font-price text-[#171815] text-right">
               {voucher.minOrder > 0 ? formatPrice(voucher.minOrder) : '0đ (Không yêu cầu)'}
             </span>
           </div>
-          <div className="flex items-center justify-between gap-2 py-1 min-h-[32px] shrink-0 border-b border-[#951722]/10">
-            <span className="text-[#171815]/70">Mức ưu đãi tối đa:</span>
+
+          <div className="flex items-center justify-between gap-3 py-1.5 border-b border-[#951722]/12">
+            <span className="text-[#171815]/70 shrink-0">Mức ưu đãi tối đa:</span>
             <span className="font-semibold font-price text-[#9B0514] text-right">
               {formatPrice(voucher.maxDiscount)}
             </span>
           </div>
-          <div className="py-1 min-h-[68px] shrink-0 flex flex-col justify-center border-b border-[#951722]/10">
-            <span className="text-[#171815]/70 block mb-0.5">Sản phẩm áp dụng:</span>
-            <p
-              lang="vi"
-              className="story-justify font-medium text-[#1F3D2A] leading-[1.55] line-clamp-2 h-[44px] min-h-[44px]"
-            >
+
+          <div className="py-1.5 border-b border-[#951722]/12 space-y-1">
+            <span className="text-[#171815]/70 block text-xs uppercase tracking-wider font-semibold">
+              Sản phẩm áp dụng:
+            </span>
+            <div className="text-[14.5px] font-semibold text-[#1F3D2A] leading-[1.55] text-left">
               {voucher.applicableProductsText}
-            </p>
-          </div>
-          <div className="flex items-center justify-between gap-2 py-1 min-h-[32px] shrink-0 border-b border-[#951722]/10">
-            <span className="text-[#171815]/70">Thời hạn ưu đãi:</span>
-            <span className="font-medium text-right">{voucher.expiryDisplay}</span>
+            </div>
           </div>
 
+          <div className="flex items-center justify-between gap-3 py-1.5 border-b border-[#951722]/12">
+            <span className="text-[#171815]/70 shrink-0">Thời hạn ưu đãi:</span>
+            <span className="font-semibold text-[#171815] text-right">
+              {voucher.expiryDisplay}
+            </span>
+          </div>
+
+          {!compact && (
+            <>
+              <div className="py-1.5 border-b border-[#951722]/12 space-y-1">
+                <span className="text-[#171815]/70 block text-xs uppercase tracking-wider font-semibold">
+                  Quy định cộng gộp:
+                </span>
+                <div className="text-[14.5px] font-medium text-[#171815] leading-[1.55] text-left">
+                  {voucher.stackableText}
+                </div>
+              </div>
+
+              <div className="py-1.5 border-b border-[#951722]/12 space-y-1">
+                <span className="text-[#171815]/70 block text-xs uppercase tracking-wider font-semibold">
+                  Giới hạn lượt dùng:
+                </span>
+                <div className="text-[14.5px] font-medium text-[#171815] leading-[1.55] text-left">
+                  {voucher.usageLimit}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Bottom Anchored Section: 3-Step Box + Detailed Terms Trigger + 2 Action Buttons */}
+        <div className="mt-auto space-y-3 pt-1">
           {compact ? (
-            <div className="pt-1 mt-auto">
+            <div>
               <Link
                 to={`/khuyen-mai#ma-voucher-${voucher.code}`}
                 className="inline-flex items-center gap-1.5 text-xs font-bold text-[#951722] hover:underline"
@@ -170,37 +199,14 @@ export const VoucherCard: React.FC<VoucherCardProps> = ({
             </div>
           ) : (
             <>
-              <div className="py-1 min-h-[68px] shrink-0 flex flex-col justify-center border-b border-[#951722]/10">
-                <span className="text-[#171815]/70 block mb-0.5">Quy định cộng gộp:</span>
-                <p
-                  lang="vi"
-                  className="story-justify font-medium leading-[1.55] line-clamp-2 h-[44px] min-h-[44px]"
-                >
-                  {voucher.stackableText}
-                </p>
-              </div>
-              <div className="py-1 min-h-[48px] shrink-0 flex flex-col justify-center border-b border-[#951722]/10">
-                <span className="text-[#171815]/70 block mb-0.5">Giới hạn lượt dùng:</span>
-                <p
-                  lang="vi"
-                  className="story-justify font-medium leading-[1.55] line-clamp-1 h-[22px] min-h-[22px]"
-                >
-                  {voucher.usageLimit}
-                </p>
-              </div>
-
-              {/* 3-step How to use — flex-1 so sibling cards align at the bottom */}
-              <div className="flex-1 min-h-[148px] flex flex-col justify-between bg-[#FFF5E4] p-3.5 rounded-xl border border-[#951722]/20">
-                <span className="font-bold text-xs uppercase tracking-wider text-[#951722] mb-1 block">
+              {/* 3-step How to use — snug fit, clean left alignment */}
+              <div className="bg-[#FFF5E4] p-4 rounded-xl border border-[#951722]/20 space-y-2 text-left">
+                <span className="font-bold text-xs uppercase tracking-wider text-[#951722] block">
                   Cách sử dụng (3 bước):
                 </span>
-                <ol className="space-y-1 text-xs text-[#171815]/90 my-auto">
+                <ol className="space-y-1.5 text-[13.5px] sm:text-[14px] text-[#171815]/90 leading-[1.55]">
                   {voucher.howToUse.map((step, idx) => (
-                    <li
-                      key={idx}
-                      className="story-justify leading-[1.55] line-clamp-2"
-                      lang="vi"
-                    >
+                    <li key={idx} className="text-left">
                       {step}
                     </li>
                   ))}
@@ -208,13 +214,13 @@ export const VoucherCard: React.FC<VoucherCardProps> = ({
               </div>
 
               {/* Trigger button to open in-card Detailed Terms overlay */}
-              <div className="shrink-0">
+              <div>
                 <button
                   type="button"
                   data-testid={`voucher-terms-btn-${voucher.code}`}
                   onClick={() => setTermsOpen((prev) => !prev)}
                   aria-expanded={termsOpen}
-                  className="w-full flex items-center justify-between text-xs font-bold text-[#1F3D2A] hover:text-[#951722] py-2 px-3 rounded-xl bg-[#FFF5E4]/80 hover:bg-[#FFF5E4] border border-[#1F3D2A]/20 transition-colors cursor-pointer"
+                  className="w-full flex items-center justify-between text-xs font-bold text-[#1F3D2A] hover:text-[#951722] py-2.5 px-3.5 rounded-xl bg-[#FFF5E4]/85 hover:bg-[#FFF5E4] border border-[#1F3D2A]/20 transition-colors cursor-pointer"
                 >
                   <span className="inline-flex items-center gap-1.5">
                     <FileText className="w-3.5 h-3.5 text-[#951722]" />
@@ -229,6 +235,33 @@ export const VoucherCard: React.FC<VoucherCardProps> = ({
               </div>
             </>
           )}
+
+          {/* Two Action Buttons — 2-column grid with min-w-0 so buttons never overflow horizontally or vertically */}
+          <div className="pt-0.5 grid grid-cols-2 gap-2.5 w-full relative z-10">
+            <button
+              type="button"
+              onClick={handleUseVoucher}
+              className={`btn-sheen w-full min-w-0 min-h-[48px] px-3.5 sm:px-4 py-2 rounded-xl font-bold text-[15px] sm:text-[16px] leading-[1.3] transition-all flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer active:scale-[0.98] ${
+                isSaved
+                  ? 'bg-[#1F3D2A] text-[#FFF5E4] border-2 border-[#1F3D2A]'
+                  : 'border-2 border-[#1F3D2A] text-[#1F3D2A] hover:bg-[#1F3D2A] hover:text-[#FFF5E4]'
+              }`}
+            >
+              {isSaved ? (
+                <>
+                  <Check className="w-4 h-4 shrink-0" />
+                  <span>Đã lưu mã</span>
+                </>
+              ) : (
+                <span>Dùng mã này</span>
+              )}
+            </button>
+            <BuyNowButton
+              onClick={handleBuyNowEligible}
+              size="sm"
+              className="w-full !min-w-0 !min-h-[48px] !px-3.5 sm:!px-4 !py-2 !text-[15px] sm:!text-[16px]"
+            />
+          </div>
         </div>
 
         {/* In-card Overlay for Detailed Terms & Conditions — isolated to THIS card only, zero height change */}
@@ -244,7 +277,7 @@ export const VoucherCard: React.FC<VoucherCardProps> = ({
                 duration: MOTION_TOKENS.durations.fast,
                 ease: MOTION_TOKENS.easings.standard,
               }}
-              className="absolute inset-x-4 top-3 bottom-[76px] z-20 rounded-2xl bg-[#FFFBF2] border-2 border-[#1F3D2A] shadow-xl flex flex-col overflow-hidden"
+              className="absolute inset-x-4 top-3 bottom-[72px] z-20 rounded-2xl bg-[#FFFBF2] border-2 border-[#1F3D2A] shadow-xl flex flex-col overflow-hidden text-left"
             >
               <div className="bg-[#1F3D2A] text-[#FFF5E4] px-4 py-2.5 flex items-center justify-between gap-2 shrink-0">
                 <div className="flex items-center gap-2 min-w-0">
@@ -265,14 +298,14 @@ export const VoucherCard: React.FC<VoucherCardProps> = ({
                 </button>
               </div>
 
-              <div className="p-4 overflow-y-auto flex-1 space-y-3 text-xs text-[#171815]/90">
+              <div className="p-4 overflow-y-auto flex-1 space-y-3 text-[13.5px] text-[#171815]/90 leading-[1.6]">
                 <div className="p-3 rounded-xl bg-[#FFF5E4] border border-[#951722]/20 space-y-1">
-                  <span className="font-bold text-[#951722] block">
+                  <span className="font-bold text-[#951722] block text-xs uppercase tracking-wider">
                     Tóm tắt ưu đãi ({voucher.valueText}):
                   </span>
-                  <p lang="vi" className="leading-[1.6] text-[#171815]/85">
+                  <div className="text-[13.5px] leading-[1.55] text-[#171815] font-medium">
                     {voucher.applicableProductsText}
-                  </p>
+                  </div>
                 </div>
 
                 <div className="space-y-1.5">
@@ -281,20 +314,20 @@ export const VoucherCard: React.FC<VoucherCardProps> = ({
                   </span>
                   <ul className="list-disc pl-4 space-y-1.5">
                     {voucher.conditions.map((c, i) => (
-                      <li key={i} className="story-justify leading-[1.65]" lang="vi">
+                      <li key={i} className="leading-[1.6] text-left">
                         {c}
                       </li>
                     ))}
                   </ul>
                 </div>
 
-                <div className="space-y-1.5 pt-1 border-t border-[#951722]/15">
+                <div className="space-y-1.5 pt-2 border-t border-[#951722]/15">
                   <span className="font-bold text-[#1F3D2A] block">
                     2. Quy định chi tiết & Lưu ý:
                   </span>
                   <ul className="list-disc pl-4 space-y-1.5">
                     {voucher.detailedTerms.map((t, i) => (
-                      <li key={`t-${i}`} className="story-justify leading-[1.65]" lang="vi">
+                      <li key={`t-${i}`} className="leading-[1.6] text-left">
                         {t}
                       </li>
                     ))}
@@ -304,33 +337,6 @@ export const VoucherCard: React.FC<VoucherCardProps> = ({
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Two Action Buttons — 2-column grid with min-w-0 so buttons never overflow horizontally or vertically */}
-        <div className="pt-1 shrink-0 grid grid-cols-2 gap-2.5 w-full relative z-10">
-          <button
-            type="button"
-            onClick={handleUseVoucher}
-            className={`btn-sheen w-full min-w-0 min-h-[48px] px-3.5 sm:px-4 py-2 rounded-xl font-bold text-[15px] sm:text-[16px] leading-[1.3] transition-all flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer active:scale-[0.98] ${
-              isSaved
-                ? 'bg-[#1F3D2A] text-[#FFF5E4] border-2 border-[#1F3D2A]'
-                : 'border-2 border-[#1F3D2A] text-[#1F3D2A] hover:bg-[#1F3D2A] hover:text-[#FFF5E4]'
-            }`}
-          >
-            {isSaved ? (
-              <>
-                <Check className="w-4 h-4 shrink-0" />
-                <span>Đã lưu mã</span>
-              </>
-            ) : (
-              <span>Dùng mã này</span>
-            )}
-          </button>
-          <BuyNowButton
-            onClick={handleBuyNowEligible}
-            size="sm"
-            className="w-full !min-w-0 !min-h-[48px] !px-3.5 sm:!px-4 !py-2 !text-[15px] sm:!text-[16px]"
-          />
-        </div>
       </div>
     </article>
   );

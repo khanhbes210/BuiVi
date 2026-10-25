@@ -1,6 +1,6 @@
 {
-  "summary":  "Kế hoạch nâng cấp toàn diện hệ thống Box đồng nhất chiều cao & 2 nút 1 hàng, Modal Xem nhanh sản phẩm (Quick-View) khi hover, Menu thả xuống Tỉnh/Thành phố tùy chỉnh phong cách Bùi Vị trên Thanh toán & Sổ địa chỉ, và Bộ sắp xếp sản phẩm kèm chuyển tab mượt trên trang Sản phẩm.",
-  "updatedAt":  "2026-10-24T19:29:32.746841959Z",
+  "summary":  "Kế hoạch khắc phục toàn diện lỗi hiển thị bị cắt chữ, khoảng trống dư thừa, căn đều 2 bên (justify) trong thẻ hẹp và chuẩn hóa nội dung/logic các mã khuyến mãi trên trang Khuyến mãi & toàn hệ thống Bùi Vị.",
+  "updatedAt":  "2026-10-25T08:03:06.053560928Z",
   "requestFeedback":  true,
   "userFacing":  true
 }
